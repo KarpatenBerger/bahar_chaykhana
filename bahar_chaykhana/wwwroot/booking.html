@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование столика - Чайхана Бахар</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/booking.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Бахар</h1>
+                <span>чайхана азербайджанской кухни</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="menu.html">Меню</a></li>
+                    <li><a href="about.html">О нас</a></li>
+                    <li><a href="booking.html" class="active">Бронь столика</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                    <li><a href="login.html">Войти</a></li>
+                    <li><a href="cart.html" class="cart-link">Корзина (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h2>Бронирование столика</h2>
+                <p>Забронируйте столик онлайн — мы подтвердим бронь в течение 15 минут</p>
+            </div>
+        </section>
+
+        <section class="booking-form-section">
+            <div class="container">
+                <div class="booking-wrapper">
+                    <div class="booking-info">
+                        <h3>Как это работает</h3>
+                        <ol>
+                            <li>Укажите дату, время и количество гостей</li>
+                            <li>Оставьте контактные данные</li>
+                            <li>Дождитесь подтверждения от администратора</li>
+                        </ol>
+                        <p class="booking-note">Для компаний более 10 человек рекомендуем позвонить напрямую — мы поможем подобрать подходящий зал и обсудить банкетное меню.</p>
+                    </div>
+
+                    <form id="booking-form" class="booking-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="date">Дата</label>
+                                <input type="date" id="date" name="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="time">Время</label>
+                                <input type="time" id="time" name="time" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="guests">Количество гостей</label>
+                            <input type="number" id="guests" name="guests" min="1" max="30" value="2" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Ваше имя</label>
+                            <input type="text" id="name" name="name" placeholder="Как к вам обращаться" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Телефон</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email (необязательно)</label>
+                            <input type="email" id="email" name="email" placeholder="Для уведомлений о статусе брони">
+                            <p class="form-hint">Укажите email, если хотите получать уведомления о подтверждении брони и возможность отменить её по ссылке</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="comment">Комментарий (необязательно)</label>
+                            <textarea id="comment" name="comment" rows="3" placeholder="Особые пожелания, аллергии, повод визита"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Забронировать столик</button>
+                    </form>
+                </div>
+
+                <div id="booking-message" class="booking-message" style="display: none;"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Чайхана Бахар</h4>
+                    <p>Традиционная азербайджанская кухня</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p>ул. Светланская, 83, Владивосток</p>
+                    <p>Тел: +7 (423) 123-45-67</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Режим работы</h4>
+                    <p>Ежедневно: 10:00 - 23:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Чайхана Бахар. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/booking.js"></script>
+</body>
+</html>

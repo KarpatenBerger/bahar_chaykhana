@@ -1,0 +1,46 @@
+/* ==========================================================================
+   auth.css — вход и регистрация гостя
+   ========================================================================== */
+
+.auth-section {
+    padding: 60px 0 90px;
+}
+
+.auth-wrapper {
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 40px 36px;
+    text-align: center;
+}
+
+.auth-wrapper h2 {
+    font-size: 26px;
+    margin-bottom: 0.3em;
+}
+
+.auth-subtitle {
+    color: var(--color-ink-soft);
+    font-size: 14.5px;
+    margin-bottom: 1.8em;
+}
+
+.auth-form {
+    text-align: left;
+}
+
+.form-actions {
+    margin-top: 10px;
+}
+
+.form-actions .btn {
+    width: 100%;
+}
+
+.auth-links {
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--color-ink-soft);
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа - Чайхана Бахар</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/checkout.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Бахар</h1>
+                <span>чайхана азербайджанской кухни</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="menu.html">Меню</a></li>
+                    <li><a href="about.html">О нас</a></li>
+                    <li><a href="booking.html">Бронь столика</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                    <li><a href="login.html">Войти</a></li>
+                    <li><a href="cart.html" class="cart-link">Корзина (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h2>Оформление заказа</h2>
+                <p>Проверьте данные и подтвердите заказ</p>
+            </div>
+        </section>
+
+        <section class="checkout-section">
+            <div class="container">
+                <div class="checkout-layout">
+                    <!-- Форма оформления -->
+                    <div class="checkout-form">
+                        <h3>Детали заказа</h3>
+                        
+                        <form id="checkout-form">
+                            <!-- Способ получения -->
+                            <div class="form-group">
+                                <label>Способ получения</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="delivery-type" value="pickup" checked>
+                                        Самовывоз
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="delivery-type" value="delivery">
+                                        Доставка
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Адрес доставки (показывается только при выборе доставки) -->
+                            <div class="form-group" id="address-group" style="display: none;">
+                                <label for="address">Адрес доставки</label>
+                                <input type="text" id="address" name="address" placeholder="Улица, дом, квартира">
+                                <p class="form-hint">Доставка работает в пределах города</p>
+                            </div>
+
+                            <!-- Контактные данные -->
+                            <div class="form-group">
+                                <label for="phone">Телефон</label>
+                                <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___-__-__" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email (необязательно)</label>
+                                <input type="email" id="email" name="email" placeholder="Для уведомлений о статусе заказа">
+                                <p class="form-hint">Укажите email, если хотите получать уведомления о статусе заказа и возможность отменить его по ссылке</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Ваше имя</label>
+                                <input type="text" id="name" name="name" placeholder="Как к вам обращаться" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comment">Комментарий к заказу (необязательно)</label>
+                                <textarea id="comment" name="comment" rows="3" placeholder="Например: не острое, без лука"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-large">Подтвердить заказ</button>
+                        </form>
+                    </div>
+
+                    <!-- Итоговая информация -->
+                    <div class="checkout-summary">
+                        <h3>Ваш заказ</h3>
+                        
+                        <div id="order-items" class="order-items">
+                            <!-- Сюда JavaScript добавит список блюд из корзины -->
+                            <p class="empty-message">Корзина пуста</p>
+                        </div>
+
+                        <div class="summary-totals">
+                            <div class="summary-row">
+                                <span>Сумма заказа:</span>
+                                <span id="subtotal">0 ₽</span>
+                            </div>
+
+                            <div class="summary-row" id="delivery-row" style="display: none;">
+                                <span>Доставка:</span>
+                                <span id="delivery-cost">300 ₽</span>
+                            </div>
+
+                            <div class="summary-row bonus-row">
+                                <label class="bonus-label">
+                                    <input type="checkbox" id="use-bonus" disabled>
+                                    Использовать бонусы (<span id="bonus-balance">0</span> баллов)
+                                </label>
+                                <span class="bonus-discount" id="bonus-discount">-0 ₽</span>
+                            </div>
+
+                            <div class="summary-row total-row">
+                                <span>Итого:</span>
+                                <span id="final-total">0 ₽</span>
+                            </div>
+                        </div>
+
+                        <div class="checkout-note">
+                            <p>Оплата производится наличными или картой при получении заказа</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Чайхана Бахар</h4>
+                    <p>Традиционная азербайджанская кухня</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p>ул. Светланская, 83, Владивосток</p>
+                    <p>Тел: +7 (423) 123-45-67</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Режим работы</h4>
+                    <p>Ежедневно: 10:00 - 23:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Чайхана Бахар. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/checkout.js"></script>
+</body>
+</html>

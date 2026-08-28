@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Чайхана Бахар</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Бахар</h1>
+                <span>чайхана азербайджанской кухни</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="menu.html">Меню</a></li>
+                    <li><a href="about.html">О нас</a></li>
+                    <li><a href="booking.html">Бронь столика</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                    <li><a href="profile.html" class="active">Кабинет</a></li>
+                    <li><a href="cart.html" class="cart-link">Корзина (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h2>Личный кабинет</h2>
+                <p>Ваши данные, история заказов и бонусные баллы</p>
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <div class="container">
+                <!-- Блок, который показывается, если пользователь не авторизован -->
+                <div id="not-logged-in" class="auth-notice" style="display: none;">
+                    <h3>Вы не вошли в аккаунт</h3>
+                    <p>Чтобы видеть историю заказов и копить бонусы, войдите в личный кабинет.</p>
+                    <a href="login.html" class="btn btn-primary">Войти</a>
+                </div>
+
+                <!-- Основной контент личного кабинета -->
+                <div id="profile-content" class="profile-content">
+                    <div class="profile-top">
+                        <div class="profile-welcome">
+                            <h3>Здравствуйте, <span id="user-name">Гость</span>!</h3>
+                            <p class="profile-email" id="user-email">email@example.com</p>
+                        </div>
+                        <div class="bonus-card">
+                            <div class="bonus-label">Ваши бонусы</div>
+                            <div class="bonus-value"><span id="bonus-balance">0</span> баллов</div>
+                            <div class="bonus-hint">1 балл = 1 рубль скидки</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-grid">
+                        <!-- Мои данные -->
+                        <div class="profile-block">
+                            <h4>Мои данные</h4>
+                            <div class="profile-info">
+                                <div class="info-row">
+                                    <span class="info-label">Телефон:</span>
+                                    <span class="info-value" id="user-phone">+7 (___) ___-__-__</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Email:</span>
+                                    <span class="info-value" id="user-email-info">email@example.com</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Дата регистрации:</span>
+                                    <span class="info-value" id="user-register-date">—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Активные бронирования -->
+                        <div class="profile-block">
+                            <h4>Активные бронирования</h4>
+                            <div id="active-reservations" class="reservations-list">
+                                <p class="empty-message">У вас пока нет активных бронирований.</p>
+                            </div>
+                        </div>
+
+                        <!-- История заказов -->
+                        <div class="profile-block full-width">
+                            <h4>История заказов</h4>
+                            <div id="orders-history" class="orders-list">
+                                <p class="empty-message">Вы ещё не делали заказов. <a href="menu.html">Перейти к меню</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <a href="menu.html" class="btn btn-secondary">Сделать новый заказ</a>
+                        <a href="booking.html" class="btn btn-secondary">Забронировать столик</a>
+                        <button id="logout-btn" class="btn btn-outline">Выйти из аккаунта</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Чайхана Бахар</h4>
+                    <p>Традиционная азербайджанская кухня</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p>ул. Светланская, 83, Владивосток</p>
+                    <p>Тел: +7 (423) 123-45-67</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Режим работы</h4>
+                    <p>Ежедневно: 10:00 - 23:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Чайхана Бахар. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

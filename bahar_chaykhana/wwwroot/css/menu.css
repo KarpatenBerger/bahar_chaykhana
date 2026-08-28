@@ -1,0 +1,93 @@
+/* ==========================================================================
+   menu.css — страница меню
+   ========================================================================== */
+
+.menu-hero {
+    background: var(--color-cream-deep);
+    padding: 46px 0 36px;
+    text-align: center;
+}
+
+.menu-hero h2 {
+    font-size: 32px;
+    margin-bottom: 0.2em;
+}
+
+.menu-hero p {
+    color: var(--color-ink-soft);
+    margin: 0;
+}
+
+.menu-categories {
+    padding: 28px 0 6px;
+    position: sticky;
+    top: 73px;
+    background: var(--color-cream);
+    z-index: 10;
+}
+
+.category-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.category-btn {
+    background: var(--color-white);
+    border: 1.5px solid var(--color-cream-deep);
+    border-radius: 999px;
+    padding: 9px 18px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--color-ink);
+    cursor: pointer;
+}
+
+.category-btn:hover {
+    border-color: var(--color-brass);
+}
+
+.category-btn.active {
+    background: var(--color-pomegranate);
+    border-color: var(--color-pomegranate);
+    color: var(--color-white);
+}
+
+.menu-items {
+    padding: 34px 0 70px;
+}
+
+.dishes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 22px;
+}
+
+.dish-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px 18px;
+}
+
+.dish-footer .price {
+    padding: 0;
+}
+
+.dish-weight {
+    padding-left: 18px;
+    padding-right: 18px;
+    font-size: 12.5px;
+    color: var(--color-ink-soft);
+    margin-bottom: 10px;
+}
+
+.empty-message,
+.error-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--color-ink-soft);
+    padding: 30px 0;
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню - Чайхана Бахар</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/menu.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Бахар</h1>
+                <span>чайхана азербайджанской кухни</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="menu.html" class="active">Меню</a></li>
+                    <li><a href="about.html">О нас</a></li>
+                    <li><a href="booking.html">Бронь столика</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                    <li><a href="login.html">Войти</a></li>
+                    <li><a href="cart.html" class="cart-link">Корзина (<span id="cart-count">0</span>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="menu-hero">
+            <div class="container">
+                <h2>Наше меню</h2>
+                <p>Традиционные блюда азербайджанской кухни</p>
+            </div>
+        </section>
+
+        <section class="menu-categories">
+            <div class="container">
+                <div class="category-buttons">
+                    <button class="category-btn active" data-category="all">Все блюда</button>
+                    <button class="category-btn" data-category="soups">Супы</button>
+                    <button class="category-btn" data-category="shashlik">Шашлык</button>
+                    <button class="category-btn" data-category="hot">Горячие блюда</button>
+                    <button class="category-btn" data-category="salads">Салаты</button>
+                    <button class="category-btn" data-category="bread">Хлеб</button>
+                    <button class="category-btn" data-category="drinks">Напитки</button>
+                    <button class="category-btn" data-category="desserts">Десерты</button>
+                    <button class="category-btn" data-category="banquet">Банкеты</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="menu-items">
+            <div class="container">
+                <div id="dishes-container" class="dishes-grid">
+                    <!-- Блюда будут загружены через JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Чайхана Бахар</h4>
+                    <p>Традиционная азербайджанская кухня</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p>ул. Светланская, 83, Владивосток</p>
+                    <p>Тел: +7 (423) 123-45-67</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Режим работы</h4>
+                    <p>Ежедневно: 10:00 - 23:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Чайхана Бахар. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/menu.js"></script>
+</body>
+</html>

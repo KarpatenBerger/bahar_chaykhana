@@ -1,0 +1,108 @@
+/* ==========================================================================
+   about.css — страница «О нас»
+   ========================================================================== */
+
+.page-header {
+    background: var(--color-cream-deep);
+    padding: 46px 0 36px;
+    text-align: center;
+}
+
+.page-header h2 {
+    font-size: 32px;
+    margin-bottom: 0.2em;
+}
+
+.page-header p {
+    color: var(--color-ink-soft);
+    margin: 0;
+}
+
+.about-content {
+    padding: 56px 0;
+}
+
+.about-content .container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 46px;
+    align-items: start;
+}
+
+.about-text h3 {
+    font-size: 24px;
+}
+
+.about-text p {
+    color: var(--color-ink-soft);
+    font-size: 15.5px;
+}
+
+.about-image .image-placeholder {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--radius-lg);
+    background: repeating-linear-gradient(
+        135deg,
+        var(--color-cream-deep),
+        var(--color-cream-deep) 12px,
+        var(--color-cream) 12px,
+        var(--color-cream) 24px
+    );
+}
+
+.about-features {
+    background: var(--color-white);
+    padding: 56px 0;
+}
+
+.about-features h3 {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 36px;
+}
+
+.about-gallery {
+    padding: 56px 0 70px;
+}
+
+.about-gallery h3 {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 28px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.gallery-item {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius);
+    background: repeating-linear-gradient(
+        135deg,
+        var(--color-cream-deep),
+        var(--color-cream-deep) 10px,
+        var(--color-white) 10px,
+        var(--color-white) 20px
+    );
+}
+
+.gallery-note {
+    text-align: center;
+    color: var(--color-ink-soft);
+    font-size: 13.5px;
+    margin-top: 20px;
+}
+
+@media (max-width: 720px) {
+    .about-content .container {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

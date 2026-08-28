@@ -1,0 +1,482 @@
+/* ==========================================================================
+   style.css — общая дизайн-система сайта чайханы «Бахар»
+   Подключается на всех страницах первым, до файла конкретной страницы.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* Палитра — гранат, латунь, тёплый кофейный текст, редкий бирюзовый акцент */
+    --color-pomegranate: #7A2A35;
+    --color-pomegranate-dark: #591E26;
+    --color-brass: #C08A2E;
+    --color-brass-light: #E0B565;
+    --color-cream: #FBF3E7;
+    --color-cream-deep: #F1E1C6;
+    --color-ink: #2B211C;
+    --color-ink-soft: #5A4E44;
+    --color-teal: #2F5D50;
+    --color-white: #FFFFFF;
+    --color-danger: #A3352E;
+    --color-success: #3B6D11;
+
+    /* Типографика */
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Manrope', 'Segoe UI', sans-serif;
+
+    /* Разное */
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow-card: 0 2px 10px rgba(43, 33, 28, 0.08);
+    --max-width: 1140px;
+}
+
+/* ---------- Сброс и база ---------- */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    background: var(--color-cream);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    color: var(--color-pomegranate);
+    line-height: 1.2;
+    margin: 0 0 0.6em;
+}
+
+p {
+    margin: 0 0 1em;
+}
+
+a {
+    color: var(--color-pomegranate);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--color-brass);
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* ---------- Орнамент-разделитель (подпись стиля сайта) ----------
+   Тонкая геометрическая решётка в духе азербайджанского шебеке —
+   используется между секциями вместо обычной линии. */
+
+.ornament-divider {
+    height: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Crect width='28' height='14' fill='none'/%3E%3Cpath d='M14 1 L27 7 L14 13 L1 7 Z' fill='none' stroke='%23C08A2E' stroke-width='1'/%3E%3Ccircle cx='14' cy='7' r='2' fill='%237A2A35'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: center;
+    opacity: 0.55;
+}
+
+/* ---------- Шапка ---------- */
+
+header {
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-cream-deep);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.logo h1 {
+    font-size: 28px;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+.logo span {
+    display: block;
+    font-size: 12px;
+    color: var(--color-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 22px;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 6px 2px;
+    border-bottom: 2px solid transparent;
+}
+
+nav a:hover,
+nav a.active {
+    color: var(--color-pomegranate);
+    border-bottom-color: var(--color-brass);
+}
+
+nav a.cart-link {
+    background: var(--color-cream-deep);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border-bottom: none;
+}
+
+nav a.cart-link:hover,
+nav a.cart-link.active {
+    background: var(--color-pomegranate);
+    color: var(--color-white);
+}
+
+/* ---------- Кнопки ---------- */
+
+.btn {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 12px 26px;
+    border-radius: var(--radius);
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.12s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: var(--color-pomegranate);
+    color: var(--color-white);
+}
+
+.btn-primary:hover {
+    background: var(--color-pomegranate-dark);
+    color: var(--color-white);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--color-pomegranate);
+    border-color: var(--color-pomegranate);
+}
+
+.btn-secondary:hover {
+    background: var(--color-pomegranate);
+    color: var(--color-white);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--color-ink);
+    border-color: var(--color-ink-soft);
+}
+
+.btn-outline:hover {
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+    background: var(--color-cream-deep);
+}
+
+.btn-small {
+    padding: 7px 14px;
+    font-size: 13px;
+}
+
+.btn-large {
+    padding: 15px 34px;
+    font-size: 16px;
+}
+
+.btn-full {
+    display: block;
+    width: 100%;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---------- Секции общего вида (используются на index.html) ---------- */
+
+.hero {
+    background: linear-gradient(180deg, var(--color-cream-deep), var(--color-cream));
+    padding: 70px 0 60px;
+    text-align: center;
+}
+
+.hero h2 {
+    font-size: 40px;
+    max-width: 720px;
+    margin: 0 auto 0.4em;
+}
+
+.hero p {
+    font-size: 18px;
+    color: var(--color-ink-soft);
+    margin-bottom: 2em;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.features {
+    padding: 60px 0;
+}
+
+.features h3 {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 40px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.feature,
+.feature-card {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    padding: 26px 22px;
+    box-shadow: var(--shadow-card);
+}
+
+.feature h4,
+.feature-card h4 {
+    color: var(--color-brass);
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5em;
+}
+
+.popular-dishes {
+    padding: 20px 0 70px;
+}
+
+.popular-dishes h3 {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 36px;
+}
+
+.dishes-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-bottom: 36px;
+}
+
+.dish-card {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+
+.dish-image {
+    aspect-ratio: 4 / 3;
+    background: var(--color-cream-deep);
+}
+
+.dish-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dish-card h4,
+.dish-card p,
+.dish-card .price {
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+.dish-card h4 {
+    margin-top: 16px;
+    margin-bottom: 4px;
+    font-size: 18px;
+}
+
+.dish-card p {
+    color: var(--color-ink-soft);
+    font-size: 14px;
+}
+
+.dish-card .price {
+    display: block;
+    font-weight: 800;
+    color: var(--color-pomegranate);
+    padding-bottom: 18px;
+}
+
+/* ---------- Общие элементы форм (booking / checkout / auth) ---------- */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+label {
+    display: block;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: var(--color-ink);
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--color-cream-deep);
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-size: 15px;
+    background: var(--color-white);
+    color: var(--color-ink);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-brass);
+}
+
+.form-hint {
+    font-size: 13px;
+    color: var(--color-ink-soft);
+    margin-top: 6px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ---------- Подвал ---------- */
+
+footer {
+    background: var(--color-ink);
+    color: var(--color-cream);
+    margin-top: 60px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    padding: 46px 0 30px;
+}
+
+.footer-section h4 {
+    color: var(--color-brass-light);
+    font-size: 15px;
+    margin-bottom: 0.6em;
+}
+
+.footer-section p {
+    color: #D8CFC5;
+    font-size: 14px;
+    margin-bottom: 0.3em;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 18px 0;
+    text-align: center;
+    font-size: 13px;
+    color: #B7ADA2;
+}
+
+/* ---------- Адаптивность ---------- */
+
+@media (max-width: 720px) {
+    header .container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nav ul {
+        gap: 14px;
+        font-size: 14px;
+    }
+
+    .hero h2 {
+        font-size: 28px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

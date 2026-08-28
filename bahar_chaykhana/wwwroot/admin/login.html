@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход для сотрудников - Чайхана Бахар</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+    <div class="admin-login-wrapper">
+        <div class="admin-login-card">
+            <div class="admin-logo">
+                <h1>Бахар</h1>
+                <span>панель сотрудника</span>
+            </div>
+            <h2>Вход в систему</h2>
+            <p class="admin-login-hint">Введите логин и пароль, выданные администратором чайханы</p>
+
+            <form id="admin-login-form" class="admin-form">
+                <div class="form-group">
+                    <label for="login">Логин</label>
+                    <input type="text" id="login" name="login" placeholder="Ваш логин" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" name="password" placeholder="Ваш пароль" required>
+                </div>
+
+                <div id="admin-error" class="admin-error" style="display: none;"></div>
+
+                <button type="submit" class="btn btn-primary btn-full">Войти</button>
+            </form>
+
+            <div class="admin-login-footer">
+                <a href="../index.html">Вернуться на сайт</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

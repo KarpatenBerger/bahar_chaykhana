@@ -1,0 +1,81 @@
+/* ==========================================================================
+   contacts.css — страница контактов
+   ========================================================================== */
+
+.points-list {
+    padding: 50px 0 20px;
+}
+
+.points-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 400px));
+    justify-content: center;
+    gap: 24px;
+}
+
+.point-card {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 30px;
+    text-align: center;
+}
+
+.point-card h3 {
+    font-size: 20px;
+    margin-bottom: 0.4em;
+}
+
+.point-address {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--color-ink);
+}
+
+.point-phone,
+.point-hours {
+    color: var(--color-ink-soft);
+    font-size: 14px;
+    margin-bottom: 0.3em;
+}
+
+.point-card .btn {
+    margin-top: 14px;
+}
+
+.contact-info {
+    padding: 50px 0 70px;
+}
+
+.contact-info h3 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 32px;
+}
+
+.contact-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.contact-item {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    padding: 22px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+}
+
+.contact-item h4 {
+    color: var(--color-brass);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5em;
+}
+
+.contact-note {
+    color: var(--color-ink-soft);
+    font-size: 13px;
+}

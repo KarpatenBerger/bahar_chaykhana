@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления - Чайхана Бахар</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+    <div class="admin-layout">
+        <header class="admin-header">
+            <div class="admin-header-left">
+                <h1 class="admin-logo">Бахар</h1>
+                <span class="admin-subtitle">Панель сотрудника</span>
+            </div>
+            <div class="admin-header-right">
+                <div class="admin-user-info">
+                    <span id="employee-name">Сотрудник</span>
+                </div>
+                <button id="admin-logout-btn" class="btn btn-outline btn-small">Выйти</button>
+            </div>
+        </header>
+
+        <main class="admin-main">
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="orders">Заказы</button>
+                <button class="tab-btn" data-tab="reservations">Бронирования</button>
+            </div>
+
+            <!-- Вкладка с заказами -->
+            <div id="tab-orders" class="tab-content active">
+                <div class="admin-section-header">
+                    <h2>Заказы</h2>
+                    <div class="admin-filters">
+                        <select id="order-status-filter">
+                            <option value="all">Все статусы</option>
+                            <option value="новый">Новые</option>
+                            <option value="принят">Принятые</option>
+                            <option value="готовится">Готовятся</option>
+                            <option value="готов">Готовы</option>
+                            <option value="выдан">Выданные</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Дата и время</th>
+                                <th>Гость</th>
+                                <th>Тип</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <!-- Сюда JavaScript будет добавлять заказы -->
+                            <tr>
+                                <td colspan="7" class="empty-state">Загрузка заказов...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Вкладка с бронированиями -->
+            <div id="tab-reservations" class="tab-content">
+                <div class="admin-section-header">
+                    <h2>Бронирования столиков</h2>
+                    <div class="admin-filters">
+                        <select id="reservation-status-filter">
+                            <option value="all">Все статусы</option>
+                            <option value="ожидает">Ожидают</option>
+                            <option value="подтверждено">Подтверждены</option>
+                            <option value="отклонено">Отклонены</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Дата</th>
+                                <th>Время</th>
+                                <th>Гость</th>
+                                <th>Телефон</th>
+                                <th>Гостей</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservations-table-body">
+                            <!-- Сюда JavaScript будет добавлять бронирования -->
+                            <tr>
+                                <td colspan="8" class="empty-state">Загрузка бронирований...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>
