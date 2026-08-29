@@ -1,4 +1,5 @@
 ﻿using bahar_chaykhana.Data;
+using bahar_chaykhana.Services;
 using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace bahar_chaykhana.Endpoints;
@@ -84,7 +85,7 @@ public static class AdminEndpoints
         });
 
         // Смена статуса заказа
-        app.MapPatch("/api/admin/orders/{id:int}", async (HttpContext context, int id, DbConnectionFactory db) =>
+        app.MapPatch("/api/admin/orders/{id:int}", async (HttpContext context, int id, DbConnectionFactory db, EmailService emailService) =>
         {
             if (!context.Request.Cookies.TryGetValue("bahar_employee_id", out _))
                 return Results.Unauthorized();
@@ -107,6 +108,38 @@ public static class AdminEndpoints
 
             if (await cmd.ExecuteNonQueryAsync() == 0)
                 return Results.NotFound(new { message = "Заказ не найден" });
+
+            // Отправляем email только если гость указал email и статус один из требуемых
+            if (payload.Status == "принят" || payload.Status == "готов" || payload.Status == "выдан")
+            {
+                await using var infoCmd = connection.CreateCommand();
+                infoCmd.CommandText = "SELECT customer_name, email, cancel_token FROM orders WHERE id = @id";
+                infoCmd.Parameters.AddWithValue("@id", id);
+
+                string? customerName = null;
+                string? email = null;
+                string? cancelToken = null;
+
+                await using var infoReader = await infoCmd.ExecuteReaderAsync();
+                if (await infoReader.ReadAsync())
+                {
+                    customerName = infoReader.GetString(0);
+                    email = infoReader.IsDBNull(1) ? null : infoReader.GetString(1);
+                    cancelToken = infoReader.IsDBNull(2) ? null : infoReader.GetString(2);
+                }
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    try
+                    {
+                        await emailService.SendOrderStatusEmailAsync(email, customerName ?? "Гость", id, payload.Status, cancelToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ошибка отправки email: {ex.Message}");
+                    }
+                }
+            }
 
             return Results.Ok();
         });
@@ -147,7 +180,7 @@ public static class AdminEndpoints
         });
 
         // Смена статуса брони
-        app.MapPatch("/api/admin/reservations/{id:int}", async (HttpContext context, int id, DbConnectionFactory db) =>
+        app.MapPatch("/api/admin/reservations/{id:int}", async (HttpContext context, int id, DbConnectionFactory db, EmailService emailService) =>
         {
             if (!context.Request.Cookies.TryGetValue("bahar_employee_id", out _))
                 return Results.Unauthorized();
@@ -170,6 +203,38 @@ public static class AdminEndpoints
 
             if (await cmd.ExecuteNonQueryAsync() == 0)
                 return Results.NotFound(new { message = "Бронирование не найдено" });
+
+            // Отправляем email при подтверждении/отклонении брони
+            if (payload.Status == "подтверждено" || payload.Status == "отклонено")
+            {
+                await using var infoCmd = connection.CreateCommand();
+                infoCmd.CommandText = "SELECT customer_name, email, cancel_token FROM reservations WHERE id = @id";
+                infoCmd.Parameters.AddWithValue("@id", id);
+
+                string? customerName = null;
+                string? email = null;
+                string? cancelToken = null;
+
+                await using var infoReader = await infoCmd.ExecuteReaderAsync();
+                if (await infoReader.ReadAsync())
+                {
+                    customerName = infoReader.GetString(0);
+                    email = infoReader.IsDBNull(1) ? null : infoReader.GetString(1);
+                    cancelToken = infoReader.IsDBNull(2) ? null : infoReader.GetString(2);
+                }
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    try
+                    {
+                        await emailService.SendReservationStatusEmailAsync(email, customerName ?? "Гость", id, payload.Status, cancelToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ошибка отправки email: {ex.Message}");
+                    }
+                }
+            }
 
             return Results.Ok();
         });

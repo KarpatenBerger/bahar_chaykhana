@@ -1,5 +1,6 @@
 using bahar_chaykhana.Data;
 using bahar_chaykhana.Endpoints;
+using bahar_chaykhana.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ app.MapAccountEndpoints();
 app.MapOrderEndpoints();
 app.MapReservationEndpoints();
 app.MapAdminEndpoints();
+app.MapCancelEndpoints();
 
 app.MapGet("/api/health", () => "OK");
 
