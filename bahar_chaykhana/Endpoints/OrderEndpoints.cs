@@ -56,6 +56,17 @@ public static class OrderEndpoints
                 bonusUsed = Math.Min(balance, maxDiscount);
             }
 
+            // Списываем использованные бонусы с баланса гостя сразу же,
+            // чтобы их нельзя было потратить повторно в следующем заказе
+            if (bonusUsed > 0 && customerId.HasValue)
+            {
+                await using var deductCmd = connection.CreateCommand();
+                deductCmd.CommandText = "UPDATE customers SET bonus_balance = bonus_balance - @used WHERE id = @id";
+                deductCmd.Parameters.AddWithValue("@used", bonusUsed);
+                deductCmd.Parameters.AddWithValue("@id", customerId.Value);
+                await deductCmd.ExecuteNonQueryAsync();
+            }
+
             var total = subtotal + deliveryCost - bonusUsed;
 
             await using var orderCmd = connection.CreateCommand();
