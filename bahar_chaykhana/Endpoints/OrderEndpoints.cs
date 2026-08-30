@@ -1,9 +1,13 @@
-﻿using bahar_chaykhana.Data;
+﻿using System.Security.Cryptography;
+using bahar_chaykhana.Data;
 
 namespace bahar_chaykhana.Endpoints;
 
 public static class OrderEndpoints
 {
+    private static string GenerateToken() =>
+        Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+
     public static void MapOrderEndpoints(this WebApplication app)
     {
         app.MapPost("/api/orders", async (HttpContext context, DbConnectionFactory db) =>
@@ -68,11 +72,12 @@ public static class OrderEndpoints
             }
 
             var total = subtotal + deliveryCost - bonusUsed;
+            var cancelToken = GenerateToken();
 
             await using var orderCmd = connection.CreateCommand();
             orderCmd.CommandText = @"
-                INSERT INTO orders (customer_id, customer_name, phone, email, delivery_type, address, comment, status, subtotal, delivery_cost, bonus_used, total)
-                VALUES (@customerId, @name, @phone, @email, @deliveryType, @address, @comment, 'новый', @subtotal, @deliveryCost, @bonusUsed, @total)
+                INSERT INTO orders (customer_id, customer_name, phone, email, delivery_type, address, comment, status, subtotal, delivery_cost, bonus_used, total, cancel_token)
+                VALUES (@customerId, @name, @phone, @email, @deliveryType, @address, @comment, 'новый', @subtotal, @deliveryCost, @bonusUsed, @total, @cancelToken)
                 RETURNING id";
             orderCmd.Parameters.AddWithValue("@customerId", customerId.HasValue ? (object)customerId.Value : DBNull.Value);
             orderCmd.Parameters.AddWithValue("@name", payload.CustomerName);
@@ -85,6 +90,7 @@ public static class OrderEndpoints
             orderCmd.Parameters.AddWithValue("@deliveryCost", deliveryCost);
             orderCmd.Parameters.AddWithValue("@bonusUsed", bonusUsed);
             orderCmd.Parameters.AddWithValue("@total", total);
+            orderCmd.Parameters.AddWithValue("@cancelToken", cancelToken);
 
             var orderId = Convert.ToInt32(await orderCmd.ExecuteScalarAsync());
 

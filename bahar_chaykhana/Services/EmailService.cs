@@ -25,14 +25,18 @@ public class EmailService
         _useSsl = bool.Parse(smtp["UseSsl"] ?? "true");
     }
 
-    public async Task SendOrderStatusEmailAsync(string toEmail, string customerName, int orderId, string status, string? cancelToken)
+    // cancelUrl — уже полностью готовая ссылка (со схемой и хостом текущего запроса),
+    // строится на стороне вызывающего эндпоинта через context.Request.Scheme/Host,
+    // а не хранится тут захардкоженной — иначе при локальном запуске (localhost)
+    // или после переезда на реальный хостинг ссылка вела бы не туда.
+    public async Task SendOrderStatusEmailAsync(string toEmail, string customerName, int orderId, string status, string? cancelUrl)
     {
         var subject = $"Заказ №{orderId} — статус изменён на «{status}»";
         var body = $@"
             <h2>Здравствуйте, {customerName}!</h2>
             <p>Статус вашего заказа №{orderId} изменён на <strong>{status}</strong>.</p>
-            {(cancelToken != null ? $@"<p>Если вы хотите отменить заказ, перейдите по ссылке:<br>
-            <a href=""https://bahar-chaykhana.ru/api/orders/cancel/{cancelToken}"">Отменить заказ</a></p>
+            {(cancelUrl != null ? $@"<p>Если вы хотите отменить заказ, перейдите по ссылке:<br>
+            <a href=""{cancelUrl}"">Отменить заказ</a></p>
             <p><em>Ссылка действительна, пока заказ не начал готовиться.</em></p>" : "")}
             <p>С уважением,<br>Чайхана Бахар</p>
         ";
@@ -40,14 +44,14 @@ public class EmailService
         await SendEmailAsync(toEmail, subject, body);
     }
 
-    public async Task SendReservationStatusEmailAsync(string toEmail, string customerName, int reservationId, string status, string? cancelToken)
+    public async Task SendReservationStatusEmailAsync(string toEmail, string customerName, int reservationId, string status, string? cancelUrl)
     {
         var subject = $"Бронирование №{reservationId} — {status}";
         var body = $@"
             <h2>Здравствуйте, {customerName}!</h2>
             <p>Ваше бронирование №{reservationId} {status.ToLower()}.</p>
-            {(cancelToken != null ? $@"<p>Если вы хотите отменить бронь, перейдите по ссылке:<br>
-            <a href=""https://bahar-chaykhana.ru/api/reservations/cancel/{cancelToken}"">Отменить бронирование</a></p>
+            {(cancelUrl != null ? $@"<p>Если вы хотите отменить бронь, перейдите по ссылке:<br>
+            <a href=""{cancelUrl}"">Отменить бронирование</a></p>
             <p><em>Ссылка действительна не позднее чем за 30 минут до назначенного времени.</em></p>" : "")}
             <p>С уважением,<br>Чайхана Бахар</p>
         ";

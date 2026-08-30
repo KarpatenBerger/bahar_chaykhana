@@ -130,9 +130,15 @@ public static class AdminEndpoints
 
                 if (!string.IsNullOrEmpty(email))
                 {
+                    // Ссылку отмены имеет смысл присылать, только пока заказ ещё можно отменить
+                    // (в статусах "готов"/"выдан" отмена уже недоступна — см. CancelEndpoints.cs)
+                    string? cancelUrl = null;
+                    if (payload.Status == "принят" && cancelToken != null)
+                        cancelUrl = $"{context.Request.Scheme}://{context.Request.Host}/api/orders/cancel/{cancelToken}";
+
                     try
                     {
-                        await emailService.SendOrderStatusEmailAsync(email, customerName ?? "Гость", id, payload.Status, cancelToken);
+                        await emailService.SendOrderStatusEmailAsync(email, customerName ?? "Гость", id, payload.Status, cancelUrl);
                     }
                     catch (Exception ex)
                     {
@@ -225,9 +231,15 @@ public static class AdminEndpoints
 
                 if (!string.IsNullOrEmpty(email))
                 {
+                    // Ссылку отмены имеет смысл слать только при подтверждении —
+                    // отклонённую бронь отменять уже нечего
+                    string? cancelUrl = null;
+                    if (payload.Status == "подтверждено" && cancelToken != null)
+                        cancelUrl = $"{context.Request.Scheme}://{context.Request.Host}/api/reservations/cancel/{cancelToken}";
+
                     try
                     {
-                        await emailService.SendReservationStatusEmailAsync(email, customerName ?? "Гость", id, payload.Status, cancelToken);
+                        await emailService.SendReservationStatusEmailAsync(email, customerName ?? "Гость", id, payload.Status, cancelUrl);
                     }
                     catch (Exception ex)
                     {
