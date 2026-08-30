@@ -4,21 +4,20 @@ using bahar_chaykhana.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+// Регистрируем подключение к БД
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton(new DbConnectionFactory(connectionString));
 
-// Add services to the container.
+// Регистрируем сервис отправки email (понадобится для уведомлений)
+builder.Services.AddSingleton<EmailService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.UseHttpsRedirection();
-
+// Раздача статических файлов (HTML/CSS/JS)
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-
+// Подключаем все эндпоинты API
 app.MapMenuEndpoints();
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
@@ -27,7 +26,7 @@ app.MapReservationEndpoints();
 app.MapAdminEndpoints();
 app.MapCancelEndpoints();
 
+// Проверочный endpoint
 app.MapGet("/api/health", () => "OK");
-
 
 app.Run();
