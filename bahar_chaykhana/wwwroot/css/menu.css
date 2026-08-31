@@ -8,15 +8,15 @@
     text-align: center;
 }
 
-.menu-hero h2 {
-    font-size: 32px;
-    margin-bottom: 0.2em;
-}
+    .menu-hero h2 {
+        font-size: 32px;
+        margin-bottom: 0.2em;
+    }
 
-.menu-hero p {
-    color: var(--color-ink-soft);
-    margin: 0;
-}
+    .menu-hero p {
+        color: var(--color-ink-soft);
+        margin: 0;
+    }
 
 .menu-categories {
     padding: 28px 0 6px;
@@ -45,18 +45,33 @@
     cursor: pointer;
 }
 
-.category-btn:hover {
-    border-color: var(--color-brass);
-}
+    .category-btn:hover {
+        border-color: var(--color-brass);
+    }
 
-.category-btn.active {
-    background: var(--color-pomegranate);
-    border-color: var(--color-pomegranate);
-    color: var(--color-white);
-}
+    .category-btn.active {
+        background: var(--color-pomegranate);
+        border-color: var(--color-pomegranate);
+        color: var(--color-white);
+    }
 
 .menu-items {
     padding: 34px 0 70px;
+}
+
+.menu-category-section {
+    margin-bottom: 40px;
+}
+
+    .menu-category-section:last-child {
+        margin-bottom: 0;
+    }
+
+.menu-category-title {
+    font-size: 22px;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--color-cream-deep);
 }
 
 .dishes-grid {
@@ -72,9 +87,9 @@
     padding: 0 18px 18px;
 }
 
-.dish-footer .price {
-    padding: 0;
-}
+    .dish-footer .price {
+        padding: 0;
+    }
 
 .dish-weight {
     padding-left: 18px;

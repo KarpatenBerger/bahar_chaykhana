@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bahar_chaykhana", "bahar_ch
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "database", "database", "{36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}"
 	ProjectSection(SolutionItems) = preProject
+		database\migration_add_cancelled_status.sql = database\migration_add_cancelled_status.sql
 		C:\Users\MSI\Downloads\files (1)\schema.sql = C:\Users\MSI\Downloads\files (1)\schema.sql
 		C:\Users\MSI\Downloads\files (1)\seed_customers.sql = C:\Users\MSI\Downloads\files (1)\seed_customers.sql
 		C:\Users\MSI\Downloads\files (1)\seed_dishes.sql = C:\Users\MSI\Downloads\files (1)\seed_dishes.sql
