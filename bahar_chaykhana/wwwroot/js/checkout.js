@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bonusCheckboxEl) {
                 bonusCheckboxEl.disabled = balance === 0;
                 if (bonusCheckboxEl.checked) {
-                    bonusDiscount = Math.min(balance, Math.round((subtotal + deliveryCost) * 0.9));
+                    bonusDiscount = Math.min(balance, Math.floor((subtotal + deliveryCost) * 0.9));
                 }
             }
         }

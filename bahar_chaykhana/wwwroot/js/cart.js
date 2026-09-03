@@ -25,7 +25,9 @@ function saveCart(cart) {
  */
 function addToCart(dish) {
     const cart = getCart();
-    const existing = cart.find((item) => item.id === dish.id);
+    // dish.id может быть числом (пришло с сервера) или строкой (из dataset) —
+    // сравниваем как строки, чтобы не промахнуться из-за разных типов
+    const existing = cart.find((item) => String(item.id) === String(dish.id));
 
     if (existing) {
         existing.quantity += 1;
@@ -42,13 +44,13 @@ function addToCart(dish) {
 }
 
 function removeFromCart(dishId) {
-    const cart = getCart().filter((item) => item.id !== dishId);
+    const cart = getCart().filter((item) => String(item.id) !== String(dishId));
     saveCart(cart);
 }
 
 function changeQuantity(dishId, delta) {
     const cart = getCart();
-    const item = cart.find((i) => i.id === dishId);
+    const item = cart.find((i) => String(i.id) === String(dishId));
     if (!item) return;
 
     item.quantity += delta;
@@ -96,8 +98,17 @@ function renderCartPage() {
 
     if (checkoutBtn) checkoutBtn.disabled = false;
     updateCartSummary(cart);
+}
 
-    // Обработчики кнопок +/-/удалить (делегирование на контейнер)
+// Обработчики кнопок +/-/удалить (делегирование на контейнер).
+// Важно: вешаем ОДИН раз при загрузке страницы, а не внутри renderCartPage —
+// иначе при каждой перерисовке добавлялся бы ещё один обработчик поверх
+// старых, и один клик срабатывал бы сразу несколько раз (эффект накапливался
+// бы экспоненциально: 1 обработчик → 2 → 4 → 8 → 16...).
+function setupCartItemHandlers() {
+    const container = document.getElementById('cart-items-container');
+    if (!container) return;
+
     container.addEventListener('click', (e) => {
         const id = e.target.dataset.id;
         if (!id) return;
@@ -124,7 +135,7 @@ function updateCartSummary(cart) {
     const subtotal = getCartTotal(cart);
 
     // Бонусы доступны только вошедшим в личный кабинет гостям
-    const session = getGuestSession(); // функция из auth.js
+    const session = getGuestSession(); // функция из api.js
     let bonusBalance = 0;
     let finalTotal = subtotal;
 
@@ -143,11 +154,21 @@ function updateCartSummary(cart) {
     if (finalTotalEl) finalTotalEl.textContent = `${finalTotal} ₽`;
 }
 
-// Пересчитать итог при переключении чекбокса "использовать бонусы"
+// Переход к оформлению заказа
 document.addEventListener('DOMContentLoaded', () => {
     const bonusCheckbox = document.getElementById('use-bonus');
     if (bonusCheckbox) {
         bonusCheckbox.addEventListener('change', () => renderCartPage());
     }
+
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            if (checkoutBtn.disabled) return;
+            window.location.href = 'checkout.html';
+        });
+    }
+
     renderCartPage();
+    setupCartItemHandlers();
 });
