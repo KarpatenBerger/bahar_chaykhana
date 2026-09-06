@@ -45,8 +45,9 @@ CREATE TABLE orders (
     delivery_type VARCHAR(20) NOT NULL CHECK (delivery_type IN ('pickup', 'delivery')),
     address VARCHAR(255),                       -- только при delivery
     comment TEXT,
+    -- ИЗМЕНЕНО: добавлен статус 'отменён' (см. migration_add_cancelled_status.sql)
     status VARCHAR(20) NOT NULL DEFAULT 'новый'
-        CHECK (status IN ('новый', 'принят', 'готовится', 'готов', 'выдан')),
+        CHECK (status IN ('новый', 'принят', 'готовится', 'готов', 'выдан', 'отменён')),
     subtotal DECIMAL(10,2) NOT NULL,
     delivery_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
     bonus_used INT NOT NULL DEFAULT 0,
@@ -75,8 +76,11 @@ CREATE TABLE reservations (
     reservation_time TIME NOT NULL,
     guests INT NOT NULL CHECK (guests > 0),
     comment TEXT,
+    -- ИЗМЕНЕНО: добавлен статус 'отменено' — самоотмена гостем по ссылке из письма,
+    -- отдельно от 'отклонено' (решение администратора)
+    -- (см. migration_add_reservation_cancelled_status.sql)
     status VARCHAR(20) NOT NULL DEFAULT 'ожидает'
-        CHECK (status IN ('ожидает', 'подтверждено', 'отклонено')),
+        CHECK (status IN ('ожидает', 'подтверждено', 'отклонено', 'отменено')),
     cancel_token VARCHAR(64) UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT now()
 );

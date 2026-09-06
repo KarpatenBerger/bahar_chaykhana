@@ -20,19 +20,21 @@ public static class AccountEndpoints
             userCmd.CommandText = "SELECT id, name, phone, email, bonus_balance, registered_at FROM customers WHERE id = @id";
             userCmd.Parameters.AddWithValue("@id", customerId);
 
-            Customer customer = null;
-            await using var userReader = await userCmd.ExecuteReaderAsync();
-            if (await userReader.ReadAsync())
+            Customer? customer = null;
+            await using (var userReader = await userCmd.ExecuteReaderAsync())
             {
-                customer = new Customer
+                if (await userReader.ReadAsync())
                 {
-                    Id = userReader.GetInt32(0),
-                    Name = userReader.GetString(1),
-                    Phone = userReader.GetString(2),
-                    Email = userReader.GetString(3),
-                    BonusBalance = userReader.GetInt32(4),
-                    RegisteredAt = userReader.GetDateTime(5)
-                };
+                    customer = new Customer
+                    {
+                        Id = userReader.GetInt32(0),
+                        Name = userReader.GetString(1),
+                        Phone = userReader.GetString(2),
+                        Email = userReader.GetString(3),
+                        BonusBalance = userReader.GetInt32(4),
+                        RegisteredAt = userReader.GetDateTime(5)
+                    };
+                }
             }
 
             if (customer == null)
@@ -40,23 +42,36 @@ public static class AccountEndpoints
 
             var reservations = new List<object>();
             await using var resCmd = connection.CreateCommand();
+            // ИСПРАВЛЕНО: подтверждённая бронь ('подтверждено') — тоже активная и
+            // предстоящая, раньше она пропадала из личного кабинета сразу после
+            // подтверждения администратором. Плюс не показываем брони на прошедшие даты.
             resCmd.CommandText = @"
                 SELECT id, reservation_date, reservation_time, guests, status
                 FROM reservations
-                WHERE customer_id = @id AND status = 'ожидает'
+                WHERE customer_id = @id
+                  AND status IN ('ожидает', 'подтверждено')
+                  AND reservation_date >= CURRENT_DATE
                 ORDER BY reservation_date, reservation_time";
             resCmd.Parameters.AddWithValue("@id", customerId);
-            await using var resReader = await resCmd.ExecuteReaderAsync();
-            while (await resReader.ReadAsync())
+
+            await using (var resReader = await resCmd.ExecuteReaderAsync())
             {
-                reservations.Add(new
+                while (await resReader.ReadAsync())
                 {
-                    id = resReader.GetInt32(0),
-                    date = resReader.GetDateTime(1).ToString("yyyy-MM-dd"),
-                    time = resReader.GetDateTime(2).ToString("HH:mm"),
-                    guests = resReader.GetInt32(3),
-                    status = resReader.GetString(4)
-                });
+                    // ИСПРАВЛЕНО: reservation_date/reservation_time читаются как
+                    // DateOnly/TimeOnly, а не через GetDateTime (см. CancelEndpoints.cs).
+                    var date = resReader.GetFieldValue<DateOnly>(1);
+                    var time = resReader.GetFieldValue<TimeOnly>(2);
+
+                    reservations.Add(new
+                    {
+                        id = resReader.GetInt32(0),
+                        date = date.ToString("yyyy-MM-dd"),
+                        time = time.ToString("HH:mm"),
+                        guests = resReader.GetInt32(3),
+                        status = resReader.GetString(4)
+                    });
+                }
             }
 
             var orders = new List<object>();
@@ -68,16 +83,18 @@ public static class AccountEndpoints
                 ORDER BY created_at DESC
                 LIMIT 20";
             ordCmd.Parameters.AddWithValue("@id", customerId);
-            await using var ordReader = await ordCmd.ExecuteReaderAsync();
-            while (await ordReader.ReadAsync())
+            await using (var ordReader = await ordCmd.ExecuteReaderAsync())
             {
-                orders.Add(new
+                while (await ordReader.ReadAsync())
                 {
-                    id = ordReader.GetInt32(0),
-                    total = ordReader.GetDecimal(1),
-                    status = ordReader.GetString(2),
-                    createdAt = ordReader.GetDateTime(3).ToString("o")
-                });
+                    orders.Add(new
+                    {
+                        id = ordReader.GetInt32(0),
+                        total = ordReader.GetDecimal(1),
+                        status = ordReader.GetString(2),
+                        createdAt = ordReader.GetDateTime(3).ToString("o")
+                    });
+                }
             }
 
             return Results.Ok(new

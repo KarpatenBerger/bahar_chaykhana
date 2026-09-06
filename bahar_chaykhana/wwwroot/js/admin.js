@@ -39,7 +39,6 @@ function setupAdminLogin() {
     });
 }
 
-// Не пускаем на страницы админки без входа (кроме самой страницы входа)
 function guardAdminPage() {
     const isLoginPage = !!document.getElementById('admin-login-form');
     if (isLoginPage) return;
@@ -97,7 +96,11 @@ function setupTabs() {
 
 // ---------- Заказы ----------
 
+// ИСПРАВЛЕНО: разделили "рабочие" статусы (для кнопки "Далее →") и
+// полный список для <select> — иначе отменённый заказ не имел подходящей
+// опции в выпадающем списке и next-button вёл себя непредсказуемо.
 const ORDER_STATUSES = ['новый', 'принят', 'готовится', 'готов', 'выдан'];
+const ORDER_STATUS_OPTIONS = [...ORDER_STATUSES, 'отменён'];
 
 async function loadOrdersIfPresent() {
     const tbody = document.getElementById('orders-table-body');
@@ -128,17 +131,21 @@ function renderOrdersTable(orders) {
         return;
     }
 
-    tbody.innerHTML = filtered.map((o) => `
+    tbody.innerHTML = filtered.map((o) => {
+        // ИСПРАВЛЕНО: для терминального статуса "отменён" кнопку "Далее" не показываем
+        const isTerminal = o.status === 'выдан' || o.status === 'отменён';
+        return `
         <tr data-id="${o.id}">
             <td>${o.id}</td>
             <td>${formatDateTime(o.createdAt)}</td>
             <td>${o.customerName}</td>
             <td>${o.deliveryType === 'delivery' ? 'Доставка' : 'Самовывоз'}</td>
             <td>${o.total} ₽</td>
-            <td>${renderStatusSelect(o.id, o.status, ORDER_STATUSES, 'order')}</td>
-            <td><button class="btn btn-small next-status-btn" data-id="${o.id}" data-type="order">Далее →</button></td>
+            <td>${renderStatusSelect(o.id, o.status, ORDER_STATUS_OPTIONS, 'order')}</td>
+            <td>${isTerminal ? '' : `<button class="btn btn-small next-status-btn" data-id="${o.id}" data-type="order">Далее →</button>`}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 
     attachOrderRowHandlers();
 }
@@ -151,6 +158,9 @@ function attachOrderRowHandlers() {
             const currentStatus = row.querySelector('select').value;
             const currentIndex = ORDER_STATUSES.indexOf(currentStatus);
 
+            // ИСПРАВЛЕНО: currentIndex будет -1 и для 'отменён' (его нет в ORDER_STATUSES) —
+            // кнопка уже не рендерится для терминальных статусов, но проверка оставлена
+            // как дополнительная защита.
             if (currentIndex === -1 || currentIndex === ORDER_STATUSES.length - 1) return;
             const nextStatus = ORDER_STATUSES[currentIndex + 1];
 
@@ -166,7 +176,7 @@ function attachOrderRowHandlers() {
 async function changeOrderStatus(orderId, newStatus) {
     try {
         await api.patch(`/admin/orders/${orderId}`, { status: newStatus });
-        loadOrdersIfPresent(); // перезагружаем список, чтобы увидеть актуальные данные
+        loadOrdersIfPresent();
     } catch (err) {
         alert('Не удалось изменить статус заказа: ' + err.message);
     }
@@ -203,7 +213,21 @@ function renderReservationsTable(reservations) {
         return;
     }
 
-    tbody.innerHTML = filtered.map((r) => `
+    tbody.innerHTML = filtered.map((r) => {
+        // ИСПРАВЛЕНО: раньше любой статус, кроме 'ожидает', показывал кнопку
+        // "Отменить" — в т.ч. на уже отклонённых и самоотменённых (отменено) бронях,
+        // хотя менять их статус админ-эндпоинт теперь запрещает.
+        let actions = '';
+        if (r.status === 'ожидает') {
+            actions = `
+                <button class="btn btn-small confirm-btn" data-id="${r.id}">Подтвердить</button>
+                <button class="btn btn-small reject-btn" data-id="${r.id}">Отклонить</button>
+            `;
+        } else if (r.status === 'подтверждено') {
+            actions = `<button class="btn btn-small cancel-btn" data-id="${r.id}">Отменить</button>`;
+        }
+
+        return `
         <tr data-id="${r.id}">
             <td>${r.id}</td>
             <td>${formatDate(r.date)}</td>
@@ -212,14 +236,10 @@ function renderReservationsTable(reservations) {
             <td>${r.phone}</td>
             <td>${r.guests}</td>
             <td>${r.status}</td>
-            <td>
-                ${r.status === 'ожидает' ? `
-                    <button class="btn btn-small confirm-btn" data-id="${r.id}">Подтвердить</button>
-                    <button class="btn btn-small reject-btn" data-id="${r.id}">Отклонить</button>
-                ` : `<button class="btn btn-small cancel-btn" data-id="${r.id}">Отменить</button>`}
-            </td>
+            <td>${actions}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 
     attachReservationRowHandlers();
 }
@@ -251,7 +271,9 @@ function renderStatusSelect(id, currentStatus, statuses, type) {
     const options = statuses.map((s) =>
         `<option value="${s}" ${s === currentStatus ? 'selected' : ''}>${s}</option>`
     ).join('');
-    return `<select data-id="${id}" data-type="${type}">${options}</select>`;
+    // ИСПРАВЛЕНО: select для отменённого заказа отключаем — статус менять нельзя
+    const disabled = currentStatus === 'отменён' ? 'disabled' : '';
+    return `<select data-id="${id}" data-type="${type}" ${disabled}>${options}</select>`;
 }
 
 function setupStatusFilters() {

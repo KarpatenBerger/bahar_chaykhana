@@ -18,6 +18,18 @@ public static class ReservationEndpoints
             if (payload.Guests <= 0)
                 return Results.BadRequest(new { message = "Неверное количество гостей" });
 
+            // ИСПРАВЛЕНО: DateOnly.Parse/TimeOnly.Parse бросают FormatException на
+            // некорректной строке — раньше это давало необработанное исключение (500)
+            // вместо аккуратного 400 BadRequest.
+            if (!DateOnly.TryParse(payload.Date, out var reservationDate))
+                return Results.BadRequest(new { message = "Некорректный формат даты" });
+            if (!TimeOnly.TryParse(payload.Time, out var reservationTime))
+                return Results.BadRequest(new { message = "Некорректный формат времени" });
+
+            // ИСПРАВЛЕНО: раньше не было проверки, что бронь не в прошлом
+            if (reservationDate.ToDateTime(reservationTime) < DateTime.Now)
+                return Results.BadRequest(new { message = "Нельзя забронировать столик на прошедшее время" });
+
             await using var connection = db.CreateConnection();
             await connection.OpenAsync();
 
@@ -35,11 +47,11 @@ public static class ReservationEndpoints
             cmd.Parameters.AddWithValue("@customerId", customerId.HasValue ? (object)customerId.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@name", payload.CustomerName);
             cmd.Parameters.AddWithValue("@phone", payload.Phone);
-            cmd.Parameters.AddWithValue("@email", (object)payload.Email ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@date", DateOnly.Parse(payload.Date));
-            cmd.Parameters.AddWithValue("@time", TimeOnly.Parse(payload.Time));
+            cmd.Parameters.AddWithValue("@email", (object?)payload.Email ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@date", reservationDate);
+            cmd.Parameters.AddWithValue("@time", reservationTime);
             cmd.Parameters.AddWithValue("@guests", payload.Guests);
-            cmd.Parameters.AddWithValue("@comment", (object)payload.Comment ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@comment", (object?)payload.Comment ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@cancelToken", cancelToken);
 
             var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());

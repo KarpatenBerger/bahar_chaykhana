@@ -1,4 +1,5 @@
-﻿using MailKit.Net.Smtp;
+﻿using System.Net;
+using MailKit.Net.Smtp;
 using MimeKit;
 
 namespace bahar_chaykhana.Services;
@@ -25,16 +26,17 @@ public class EmailService
         _useSsl = bool.Parse(smtp["UseSsl"] ?? "true");
     }
 
-    // cancelUrl — уже полностью готовая ссылка (со схемой и хостом текущего запроса),
-    // строится на стороне вызывающего эндпоинта через context.Request.Scheme/Host,
-    // а не хранится тут захардкоженной — иначе при локальном запуске (localhost)
-    // или после переезда на реальный хостинг ссылка вела бы не туда.
     public async Task SendOrderStatusEmailAsync(string toEmail, string customerName, int orderId, string status, string? cancelUrl)
     {
+        // ИСПРАВЛЕНО: customerName приходит от пользователя (форма заказа) и
+        // подставлялся в HTML без экранирования — символы <, >, & могли сломать вёрстку письма.
+        var safeName = WebUtility.HtmlEncode(customerName);
+        var safeStatus = WebUtility.HtmlEncode(status);
+
         var subject = $"Заказ №{orderId} — статус изменён на «{status}»";
         var body = $@"
-            <h2>Здравствуйте, {customerName}!</h2>
-            <p>Статус вашего заказа №{orderId} изменён на <strong>{status}</strong>.</p>
+            <h2>Здравствуйте, {safeName}!</h2>
+            <p>Статус вашего заказа №{orderId} изменён на <strong>{safeStatus}</strong>.</p>
             {(cancelUrl != null ? $@"<p>Если вы хотите отменить заказ, перейдите по ссылке:<br>
             <a href=""{cancelUrl}"">Отменить заказ</a></p>
             <p><em>Ссылка действительна, пока заказ не начал готовиться.</em></p>" : "")}
@@ -46,10 +48,13 @@ public class EmailService
 
     public async Task SendReservationStatusEmailAsync(string toEmail, string customerName, int reservationId, string status, string? cancelUrl)
     {
+        var safeName = WebUtility.HtmlEncode(customerName);
+        var safeStatus = WebUtility.HtmlEncode(status.ToLower());
+
         var subject = $"Бронирование №{reservationId} — {status}";
         var body = $@"
-            <h2>Здравствуйте, {customerName}!</h2>
-            <p>Ваше бронирование №{reservationId} {status.ToLower()}.</p>
+            <h2>Здравствуйте, {safeName}!</h2>
+            <p>Ваше бронирование №{reservationId} {safeStatus}.</p>
             {(cancelUrl != null ? $@"<p>Если вы хотите отменить бронь, перейдите по ссылке:<br>
             <a href=""{cancelUrl}"">Отменить бронирование</a></p>
             <p><em>Ссылка действительна не позднее чем за 30 минут до назначенного времени.</em></p>" : "")}

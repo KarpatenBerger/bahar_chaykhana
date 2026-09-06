@@ -1,4 +1,5 @@
-﻿using bahar_chaykhana.Data;
+﻿using System.Text.RegularExpressions;
+using bahar_chaykhana.Data;
 using bahar_chaykhana.Models;
 using BCryptNet = BCrypt.Net.BCrypt;
 
@@ -6,6 +7,10 @@ namespace bahar_chaykhana.Endpoints;
 
 public static class AuthEndpoints
 {
+    // ИСПРАВЛЕНО: простая, но серверная проверка формата email —
+    // раньше единственная проверка была через <input type="email"> на клиенте
+    private static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+
     public static void MapAuthEndpoints(this WebApplication app)
     {
         // Регистрация
@@ -14,6 +19,12 @@ public static class AuthEndpoints
             var payload = await context.Request.ReadFromJsonAsync<RegisterRequest>();
             if (payload == null || string.IsNullOrWhiteSpace(payload.Email) || string.IsNullOrWhiteSpace(payload.Password))
                 return Results.BadRequest(new { message = "Не заполнены обязательные поля" });
+
+            // ИСПРАВЛЕНО: длина пароля и формат email раньше проверялись только в HTML-форме
+            if (!EmailRegex.IsMatch(payload.Email))
+                return Results.BadRequest(new { message = "Некорректный формат email" });
+            if (payload.Password.Length < 6)
+                return Results.BadRequest(new { message = "Пароль должен содержать не менее 6 символов" });
 
             await using var connection = db.CreateConnection();
             await connection.OpenAsync();
@@ -36,18 +47,20 @@ public static class AuthEndpoints
             insertCmd.Parameters.AddWithValue("@email", payload.Email);
             insertCmd.Parameters.AddWithValue("@hash", passwordHash);
 
-            Customer customer = null;
-            await using var reader = await insertCmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            Customer? customer = null;
+            await using (var reader = await insertCmd.ExecuteReaderAsync())
             {
-                customer = new Customer
+                if (await reader.ReadAsync())
                 {
-                    Id = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Email = reader.GetString(2),
-                    BonusBalance = reader.GetInt32(3),
-                    RegisteredAt = reader.GetDateTime(4)
-                };
+                    customer = new Customer
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Email = reader.GetString(2),
+                        BonusBalance = reader.GetInt32(3),
+                        RegisteredAt = reader.GetDateTime(4)
+                    };
+                }
             }
 
             if (customer == null)
@@ -83,20 +96,22 @@ public static class AuthEndpoints
             cmd.CommandText = "SELECT id, name, phone, email, password_hash, bonus_balance, registered_at FROM customers WHERE email = @email";
             cmd.Parameters.AddWithValue("@email", payload.Email);
 
-            Customer customer = null;
-            await using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            Customer? customer = null;
+            await using (var reader = await cmd.ExecuteReaderAsync())
             {
-                customer = new Customer
+                if (await reader.ReadAsync())
                 {
-                    Id = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Phone = reader.GetString(2),
-                    Email = reader.GetString(3),
-                    PasswordHash = reader.GetString(4),
-                    BonusBalance = reader.GetInt32(5),
-                    RegisteredAt = reader.GetDateTime(6)
-                };
+                    customer = new Customer
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                        Phone = reader.GetString(2),
+                        Email = reader.GetString(3),
+                        PasswordHash = reader.GetString(4),
+                        BonusBalance = reader.GetInt32(5),
+                        RegisteredAt = reader.GetDateTime(6)
+                    };
+                }
             }
 
             if (customer == null || !BCryptNet.Verify(payload.Password, customer.PasswordHash))

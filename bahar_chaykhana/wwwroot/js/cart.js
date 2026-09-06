@@ -134,8 +134,7 @@ function updateCartSummary(cart) {
 
     const subtotal = getCartTotal(cart);
 
-    // Бонусы доступны только вошедшим в личный кабинет гостям
-    const session = getGuestSession(); // функция из api.js
+    const session = getGuestSession();
     let bonusBalance = 0;
     let finalTotal = subtotal;
 
@@ -145,7 +144,10 @@ function updateCartSummary(cart) {
         bonusCheckbox.disabled = subtotal === 0 || bonusBalance === 0;
 
         if (bonusCheckbox.checked) {
-            const maxDiscount = Math.min(bonusBalance, Math.round(subtotal * 0.9));
+            // ИСПРАВЛЕНО: было Math.round — расходилось с сервером и checkout.js,
+            // где используется Math.floor(subtotal * 0.9). Теперь предпросмотр
+            // в корзине всегда совпадает с суммой, которая реально применится.
+            const maxDiscount = Math.min(bonusBalance, Math.floor(subtotal * 0.9));
             finalTotal = subtotal - maxDiscount;
         }
     }
