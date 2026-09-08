@@ -79,3 +79,17 @@
     color: var(--color-ink-soft);
     font-size: 13px;
 }
+
+/* ---------- Мини-карта на карточке точки ---------- */
+
+.point-map {
+    margin: 16px 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+
+    .point-map iframe {
+        display: block;
+        width: 100%;
+    }
