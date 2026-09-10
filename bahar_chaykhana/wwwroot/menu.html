@@ -59,6 +59,25 @@
                 </div>
             </div>
         </section>
+
+
+        <!-- ДОБАВЛЕНО: модальное окно с полной карточкой блюда -->
+        <div id="dish-modal-overlay" class="dish-modal-overlay" style="display: none;">
+            <div class="dish-modal" role="dialog" aria-modal="true" aria-labelledby="dish-modal-name">
+                <button class="dish-modal-close" id="dish-modal-close" aria-label="Закрыть">&times;</button>
+                <div class="dish-modal-image" id="dish-modal-image"></div>
+                <div class="dish-modal-body">
+                    <h3 id="dish-modal-name"></h3>
+                    <p class="dish-modal-weight" id="dish-modal-weight"></p>
+                    <p class="dish-modal-description" id="dish-modal-description"></p>
+                    <div class="dish-modal-footer">
+                        <span class="price" id="dish-modal-price"></span>
+                        <button class="btn btn-primary" id="dish-modal-add-btn">В корзину</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <footer>
