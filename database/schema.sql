@@ -31,6 +31,7 @@ CREATE TABLE customers (
 CREATE TABLE employees (
     id SERIAL PRIMARY KEY,
     login VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(150) NOT NULL UNIQUE, -- ДОБАВЛЕНО: для входа через общую форму по домену @bahar.ru
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(150) NOT NULL
 );

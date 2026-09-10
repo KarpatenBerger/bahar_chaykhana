@@ -7,31 +7,45 @@ namespace bahar_chaykhana.Endpoints;
 
 public static class AuthEndpoints
 {
-    // ИСПРАВЛЕНО: простая, но серверная проверка формата email —
-    // раньше единственная проверка была через <input type="email"> на клиенте
     private static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+
+    // ДОБАВЛЕНО: корпоративный домен сотрудников чайханы
+    private const string CorporateDomain = "@bahar.ru";
+
+    private static bool IsCorporateEmail(string email) =>
+        email.Trim().EndsWith(CorporateDomain, StringComparison.OrdinalIgnoreCase);
 
     public static void MapAuthEndpoints(this WebApplication app)
     {
-        // Регистрация
+        // Регистрация (только гости — корпоративная почта запрещена)
         app.MapPost("/api/auth/register", async (HttpContext context, DbConnectionFactory db) =>
         {
             var payload = await context.Request.ReadFromJsonAsync<RegisterRequest>();
             if (payload == null || string.IsNullOrWhiteSpace(payload.Email) || string.IsNullOrWhiteSpace(payload.Password))
                 return Results.BadRequest(new { message = "Не заполнены обязательные поля" });
 
-            // ИСПРАВЛЕНО: длина пароля и формат email раньше проверялись только в HTML-форме
             if (!EmailRegex.IsMatch(payload.Email))
                 return Results.BadRequest(new { message = "Некорректный формат email" });
+
+            // ДОБАВЛЕНО: корпоративная почта @bahar.ru выдаётся сотрудникам лично
+            // и не может использоваться для самостоятельной регистрации гостевого аккаунта.
+            if (IsCorporateEmail(payload.Email))
+                return Results.BadRequest(new
+                {
+                    message = "Почта с доменом @bahar.ru не может быть использована для регистрации — это корпоративный адрес, который выдаётся сотрудникам лично."
+                });
+
             if (payload.Password.Length < 6)
                 return Results.BadRequest(new { message = "Пароль должен содержать не менее 6 символов" });
+
+            var email = payload.Email.Trim().ToLowerInvariant();
 
             await using var connection = db.CreateConnection();
             await connection.OpenAsync();
 
             await using var checkCmd = connection.CreateCommand();
             checkCmd.CommandText = "SELECT id FROM customers WHERE email = @email";
-            checkCmd.Parameters.AddWithValue("@email", payload.Email);
+            checkCmd.Parameters.AddWithValue("@email", email);
             if (await checkCmd.ExecuteScalarAsync() != null)
                 return Results.Conflict(new { message = "Пользователь с таким email уже зарегистрирован" });
 
@@ -44,7 +58,7 @@ public static class AuthEndpoints
                 RETURNING id, name, email, bonus_balance, registered_at";
             insertCmd.Parameters.AddWithValue("@name", payload.Name ?? "");
             insertCmd.Parameters.AddWithValue("@phone", payload.Phone ?? "");
-            insertCmd.Parameters.AddWithValue("@email", payload.Email);
+            insertCmd.Parameters.AddWithValue("@email", email);
             insertCmd.Parameters.AddWithValue("@hash", passwordHash);
 
             Customer? customer = null;
@@ -75,6 +89,7 @@ public static class AuthEndpoints
 
             return Results.Ok(new
             {
+                role = "customer",
                 customer.Id,
                 customer.Name,
                 customer.Email,
@@ -82,19 +97,58 @@ public static class AuthEndpoints
             });
         });
 
-        // Вход
+        // Вход — общая форма для гостей и сотрудников.
+        // Домен @bahar.ru направляет проверку в таблицу employees вместо customers.
         app.MapPost("/api/auth/login", async (HttpContext context, DbConnectionFactory db) =>
         {
             var payload = await context.Request.ReadFromJsonAsync<LoginRequest>();
             if (payload == null || string.IsNullOrWhiteSpace(payload.Email) || string.IsNullOrWhiteSpace(payload.Password))
                 return Results.BadRequest(new { message = "Не заполнены обязательные поля" });
 
+            var email = payload.Email.Trim().ToLowerInvariant();
+
             await using var connection = db.CreateConnection();
             await connection.OpenAsync();
 
+            // ДОБАВЛЕНО: ветка входа сотрудника по корпоративной почте
+            if (IsCorporateEmail(email))
+            {
+                await using var empCmd = connection.CreateCommand();
+                empCmd.CommandText = "SELECT id, name, password_hash FROM employees WHERE email = @email";
+                empCmd.Parameters.AddWithValue("@email", email);
+
+                (int id, string name, string hash)? employee = null;
+                await using (var reader = await empCmd.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                        employee = (reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
+                }
+
+                // Один и тот же ответ и на "email не найден", и на "неверный пароль" —
+                // чтобы нельзя было через форму входа проверять, какие корпоративные
+                // адреса существуют в системе.
+                if (employee == null || !BCryptNet.Verify(payload.Password, employee.Value.hash))
+                    return Results.Unauthorized();
+
+                context.Response.Cookies.Append("bahar_employee_id", employee.Value.id.ToString(), new CookieOptions
+                {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Strict,
+                    MaxAge = TimeSpan.FromDays(1)
+                });
+
+                return Results.Ok(new
+                {
+                    role = "employee",
+                    employee.Value.id,
+                    employee.Value.name
+                });
+            }
+
+            // Обычный вход гостя — без изменений в логике
             await using var cmd = connection.CreateCommand();
             cmd.CommandText = "SELECT id, name, phone, email, password_hash, bonus_balance, registered_at FROM customers WHERE email = @email";
-            cmd.Parameters.AddWithValue("@email", payload.Email);
+            cmd.Parameters.AddWithValue("@email", email);
 
             Customer? customer = null;
             await using (var reader = await cmd.ExecuteReaderAsync())
@@ -126,6 +180,7 @@ public static class AuthEndpoints
 
             return Results.Ok(new
             {
+                role = "customer",
                 customer.Id,
                 customer.Name,
                 customer.Email,
@@ -133,10 +188,12 @@ public static class AuthEndpoints
             });
         });
 
-        // Выход
+        // Выход — снимаем оба возможных cookie на всякий случай (гость мог быть
+        // залогинен как сотрудник и наоборот; лишний Delete на отсутствующем cookie безопасен)
         app.MapPost("/api/auth/logout", (HttpContext context) =>
         {
             context.Response.Cookies.Delete("bahar_customer_id");
+            context.Response.Cookies.Delete("bahar_employee_id");
             return Results.Ok();
         });
     }

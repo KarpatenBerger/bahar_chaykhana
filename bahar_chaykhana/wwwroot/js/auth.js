@@ -24,6 +24,18 @@ function setupLoginForm() {
 
         try {
             const user = await api.post('/auth/login', payload);
+
+            // ДОБАВЛЕНО: разветвление по роли — сотрудник уходит в админ-панель,
+            // гость — в личный кабинет, как раньше.
+            if (user.role === 'employee') {
+                // Тот же localStorage-ключ и формат, что использует admin.js
+                // при входе через admin/login.html — поэтому guardAdminPage()
+                // в admin.js пропустит сотрудника без дополнительных правок.
+                localStorage.setItem('bahar_admin_session', JSON.stringify({ name: user.name }));
+                window.location.href = 'admin/dashboard.html';
+                return;
+            }
+
             setGuestSession({
                 name: user.name,
                 email: user.email,
@@ -85,9 +97,12 @@ function setupLogoutButton() {
         try {
             await api.post('/auth/logout', {});
         } catch {
-            // даже если сервер недоступен, чистим локальную сессию всё равно
+            // сессия на сервере могла уже истечь — это не мешает выйти локально
         }
         clearGuestSession();
+        // ДОБАВЛЕНО: на случай если это был сотрудник, вошедший через общую форму —
+        // чистим и его localStorage-сессию тоже, чтобы не осталось «залипшего» входа
+        localStorage.removeItem('bahar_admin_session');
         window.location.href = 'index.html';
     });
 }
