@@ -15,6 +15,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     renderOrderSummary();
+    prefillFromAccount();
+
+    // Если гость авторизован — подставляем его имя, телефон и email из
+    // личного кабинета, чтобы не заставлять вводить то, что там уже есть.
+    // Поля остаются редактируемыми: например, гость может оформлять заказ
+    // на другой номер телефона или для другого получателя.
+    async function prefillFromAccount() {
+        const session = getGuestSession(); // функция из api.js
+        if (!session) return; // гость не авторизован — оставляем поля пустыми
+
+        try {
+            const profile = await api.get('/account'); // сервер сверяет cookie-сессию
+            document.getElementById('name').value = profile.name;
+            document.getElementById('phone').value = profile.phone;
+            document.getElementById('email').value = profile.email;
+
+            const hint = document.getElementById('prefill-hint');
+            if (hint) hint.style.display = 'block';
+        } catch {
+            // сессия на сервере истекла — просто оставляем поля пустыми,
+            // гость введёт данные вручную, как незарегистрированный
+        }
+    }
 
     // Переключение доставка/самовывоз показывает поле адреса и стоимость доставки
     const deliveryRadios = form.querySelectorAll('input[name="delivery-type"]');

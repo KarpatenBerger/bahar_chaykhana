@@ -5,6 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     updateCartBadgeOnIndex();
+    updateAuthNavOnIndex();
 });
 
 function updateCartBadgeOnIndex() {
@@ -23,5 +24,20 @@ function updateCartBadgeOnIndex() {
         badge.textContent = count;
     } catch {
         badge.textContent = '0';
+    }
+}
+
+// Та же логика, что updateAuthNav() в api.js — продублирована здесь, потому
+// что index.html сознательно не подключает api.js (см. комментарий выше).
+// Без этого ссылка "Войти" в шапке главной страницы не менялась на "Личный
+// кабинет" даже у уже вошедшего гостя.
+function updateAuthNavOnIndex() {
+    const raw = localStorage.getItem('bahar_session');
+    if (!raw) return;
+
+    const loginLink = document.querySelector('header nav a[href="login.html"]');
+    if (loginLink) {
+        loginLink.href = 'profile.html';
+        loginLink.textContent = 'Личный кабинет';
     }
 }

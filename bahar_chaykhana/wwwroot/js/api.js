@@ -71,7 +71,10 @@ function updateCartBadge() {
 }
 
 // Обновляем счётчик сразу при загрузке любой страницы, где есть api.js
-document.addEventListener('DOMContentLoaded', updateCartBadge);
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartBadge();
+    updateAuthNav();
+});
 
 // ---------- Сессия гостя (личный кабинет) ----------
 // Хранится в localStorage в виде простого объекта после успешного входа.
@@ -97,4 +100,21 @@ function setGuestSession(sessionData) {
 
 function clearGuestSession() {
     localStorage.removeItem(SESSION_KEY);
+}
+
+// ---------- Шапка: ссылка «Войти» → «Личный кабинет», если гость уже вошёл ----------
+// Без этого со всех страниц, кроме самого profile.html, вернуться в личный
+// кабинет было невозможно — ссылка "Войти" в шапке никак не реагировала на
+// то, что пользователь уже авторизован (см. getGuestSession выше).
+// Как и остальное здесь — это только для интерфейса, реальную проверку прав
+// всё равно делает сервер по cookie при заходе на сами страницы.
+function updateAuthNav() {
+    const session = getGuestSession();
+    if (!session) return; // гость не входил — оставляем ссылку "Войти" как есть
+
+    const loginLink = document.querySelector('header nav a[href="login.html"]');
+    if (loginLink) {
+        loginLink.href = 'profile.html';
+        loginLink.textContent = 'Личный кабинет';
+    }
 }
