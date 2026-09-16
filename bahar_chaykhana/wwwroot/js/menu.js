@@ -8,13 +8,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const CATEGORY_LABELS = {
         soups: 'Супы',
+        starters: 'Закуски',
         shashlik: 'Шашлык',
         hot: 'Горячие блюда',
         salads: 'Салаты',
-        bread: 'Хлеб',
+        pastries: 'Выпечка',
         drinks: 'Напитки',
-        desserts: 'Десерты',
-        banquet: 'Банкеты'
+        desserts: 'Десерты'
     };
     const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS);
 
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${dish.imageUrl ? `<img src="${dish.imageUrl}" alt="${dish.name}">` : ''}
                 </div>
                 <h4>${dish.name}</h4>
-                <p class="dish-weight">${dish.category === 'banquet' ? 'за персону' : dish.weightG + ' г'}</p>
+                <p class="dish-weight">${dish.weightG} г</p>
                 <div class="dish-footer">
                     <span class="price">${dish.price} ₽</span>
                     <button class="btn btn-small add-to-cart-btn" data-id="${dish.id}">В корзину</button>
@@ -128,8 +128,7 @@ function openDishModal(dish) {
     if (!overlay) return;
 
     document.getElementById('dish-modal-name').textContent = dish.name;
-    document.getElementById('dish-modal-weight').textContent =
-        dish.category === 'banquet' ? 'за персону' : `${dish.weightG} г`;
+    document.getElementById('dish-modal-weight').textContent = `${dish.weightG} г`;
     // Полное описание — то же поле dishes.description из базы, которое
     // раньше нигде не отображалось на странице меню.
     document.getElementById('dish-modal-description').textContent =
