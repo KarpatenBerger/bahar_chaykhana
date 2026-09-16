@@ -34,9 +34,9 @@
     border-bottom: 1px solid var(--color-cream-deep);
 }
 
-.cart-item:last-child {
-    border-bottom: none;
-}
+    .cart-item:last-child {
+        border-bottom: none;
+    }
 
 .cart-item-info h4 {
     color: var(--color-ink);
@@ -68,9 +68,9 @@
     cursor: pointer;
 }
 
-.qty-btn:hover {
-    border-color: var(--color-brass);
-}
+    .qty-btn:hover {
+        border-color: var(--color-brass);
+    }
 
 .qty-value {
     min-width: 18px;
@@ -87,9 +87,9 @@
     margin-left: 6px;
 }
 
-.remove-btn:hover {
-    text-decoration: underline;
-}
+    .remove-btn:hover {
+        text-decoration: underline;
+    }
 
 .cart-summary {
     background: var(--color-white);
@@ -100,10 +100,10 @@
     top: 90px;
 }
 
-.cart-summary h3 {
-    font-size: 20px;
-    margin-bottom: 18px;
-}
+    .cart-summary h3 {
+        font-size: 20px;
+        margin-bottom: 18px;
+    }
 
 .summary-row {
     display: flex;
@@ -113,14 +113,14 @@
     font-size: 14.5px;
 }
 
-.summary-row.total-row {
-    border-top: 1.5px solid var(--color-cream-deep);
-    margin-top: 8px;
-    padding-top: 16px;
-    font-size: 17px;
-    font-weight: 800;
-    color: var(--color-pomegranate);
-}
+    .summary-row.total-row {
+        border-top: 1.5px solid var(--color-cream-deep);
+        margin-top: 8px;
+        padding-top: 16px;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--color-pomegranate);
+    }
 
 .bonus-row {
     flex-direction: column;
@@ -143,6 +143,32 @@
     font-size: 12px;
     color: var(--color-ink-soft);
 }
+
+.bonus-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+    .bonus-slider-row input[type="range"] {
+        flex: 1;
+        accent-color: var(--color-pomegranate);
+    }
+
+    .bonus-slider-row input[type="number"] {
+        width: 64px;
+        padding: 4px 6px;
+        border: 1px solid var(--color-cream-deep);
+        border-radius: var(--radius);
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .bonus-slider-row input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
 .cart-summary .btn {
     width: 100%;

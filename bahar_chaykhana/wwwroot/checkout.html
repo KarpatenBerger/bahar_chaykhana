@@ -115,10 +115,13 @@
                             </div>
 
                             <div class="summary-row bonus-row">
-                                <label class="bonus-label">
-                                    <input type="checkbox" id="use-bonus" disabled>
-                                    Использовать бонусы (<span id="bonus-balance">0</span> баллов)
+                                <label class="bonus-label" for="bonus-slider">
+                                    Списать бонусов (доступно <span id="bonus-balance">0</span>)
                                 </label>
+                                <div class="bonus-slider-row">
+                                    <input type="range" id="bonus-slider" min="0" max="0" value="0" step="1" disabled>
+                                    <input type="number" id="bonus-input" min="0" max="0" value="0" step="1" disabled>
+                                </div>
                                 <span class="bonus-discount" id="bonus-discount">-0 ₽</span>
                             </div>
 

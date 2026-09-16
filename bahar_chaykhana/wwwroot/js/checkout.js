@@ -58,10 +58,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Пересчёт итога при переключении бонусов
-    const bonusCheckbox = document.getElementById('use-bonus');
-    if (bonusCheckbox) {
-        bonusCheckbox.addEventListener('change', renderOrderSummary);
+    // Пересчёт итога при изменении суммы списываемых бонусов.
+    // Слайдер и числовое поле синхронизированы между собой — можно тянуть
+    // ползунок или сразу вписать точное число баллов.
+    const bonusSlider = document.getElementById('bonus-slider');
+    const bonusInput = document.getElementById('bonus-input');
+
+    if (bonusSlider && bonusInput) {
+        bonusSlider.addEventListener('input', () => {
+            bonusInput.value = bonusSlider.value;
+            renderOrderSummary();
+        });
+        bonusInput.addEventListener('input', () => {
+            // Заодно подчищаем то, что можно ввести вручную в number-поле:
+            // отрицательные числа и значения выше текущего максимума.
+            const max = Number(bonusInput.max) || 0;
+            let value = Math.round(Number(bonusInput.value)) || 0;
+            value = Math.min(Math.max(value, 0), max);
+            bonusInput.value = value;
+            bonusSlider.value = value;
+            renderOrderSummary();
+        });
     }
 
     function getSelectedDeliveryType() {
@@ -86,17 +103,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const session = getGuestSession(); // функция из api.js
         let bonusDiscount = 0;
 
-        const bonusCheckboxEl = document.getElementById('use-bonus');
+        const bonusSliderEl = document.getElementById('bonus-slider');
+        const bonusInputEl = document.getElementById('bonus-input');
         const bonusBalanceEl = document.getElementById('bonus-balance');
 
         if (session) {
             const balance = session.bonusBalance || 0;
             if (bonusBalanceEl) bonusBalanceEl.textContent = balance;
-            if (bonusCheckboxEl) {
-                bonusCheckboxEl.disabled = balance === 0;
-                if (bonusCheckboxEl.checked) {
-                    bonusDiscount = Math.min(balance, Math.floor((subtotal + deliveryCost) * 0.9));
-                }
+
+            // Правило из ТЗ: бонусами можно оплатить не больше 90% суммы заказа,
+            // и не больше, чем реально есть на балансе.
+            const maxBonus = Math.min(balance, Math.floor((subtotal + deliveryCost) * 0.9));
+
+            if (bonusSliderEl && bonusInputEl) {
+                const isUsable = maxBonus > 0;
+                bonusSliderEl.disabled = !isUsable;
+                bonusInputEl.disabled = !isUsable;
+                bonusSliderEl.max = maxBonus;
+                bonusInputEl.max = maxBonus;
+
+                // Если максимум уменьшился (например, поменяли способ доставки
+                // и сумма заказа снизилась) — подрезаем уже выбранное значение,
+                // а не сбрасываем его в ноль.
+                const current = Math.min(Number(bonusSliderEl.value) || 0, maxBonus);
+                bonusSliderEl.value = current;
+                bonusInputEl.value = current;
+
+                bonusDiscount = current;
             }
         }
 
@@ -118,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Отправляем...';
 
         const deliveryType = getSelectedDeliveryType();
-        const bonusCheckboxEl = document.getElementById('use-bonus');
+        const bonusSliderEl = document.getElementById('bonus-slider');
 
         const orderPayload = {
             items: cart.map((item) => ({ dishId: item.id, quantity: item.quantity })),
@@ -128,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             email: document.getElementById('email').value || null, // необязательное поле
             customerName: document.getElementById('name').value,
             comment: document.getElementById('comment').value,
-            useBonus: bonusCheckboxEl ? bonusCheckboxEl.checked : false
+            bonusToUse: bonusSliderEl ? Number(bonusSliderEl.value) || 0 : 0
         };
 
         try {

@@ -64,7 +64,7 @@ public static class OrderEndpoints
             await using var transaction = await connection.BeginTransactionAsync();
 
             int bonusUsed = 0;
-            if (payload.UseBonus && customerId.HasValue)
+            if (payload.BonusToUse > 0 && customerId.HasValue)
             {
                 await using var bonusCmd = connection.CreateCommand();
                 bonusCmd.Transaction = transaction;
@@ -72,7 +72,12 @@ public static class OrderEndpoints
                 bonusCmd.Parameters.AddWithValue("@id", customerId.Value);
                 var balance = Convert.ToInt32(await bonusCmd.ExecuteScalarAsync());
                 var maxDiscount = (int)Math.Floor((subtotal + deliveryCost) * 0.9m);
-                bonusUsed = Math.Min(balance, maxDiscount);
+
+                // ИЗМЕНЕНО: гость теперь сам указывает, сколько бонусов списать
+                // (было: всё-или-ничего через чекбокс). Сумму с клиента не
+                // доверяем и на сервере всё равно клампим к балансу и лимиту 90%.
+                var allowedMax = Math.Min(balance, maxDiscount);
+                bonusUsed = Math.Clamp(payload.BonusToUse, 0, allowedMax);
             }
 
             if (bonusUsed > 0 && customerId.HasValue)
@@ -160,7 +165,7 @@ public record CreateOrderRequest(
     string? Email,
     string CustomerName,
     string? Comment,
-    bool UseBonus
+    int BonusToUse
 );
 
 public record OrderItemRequest(int DishId, int Quantity);

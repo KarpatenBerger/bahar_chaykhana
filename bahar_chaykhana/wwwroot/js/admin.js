@@ -110,7 +110,7 @@ async function loadOrdersIfPresent() {
     try {
         orders = await api.get('/admin/orders');
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Не удалось загрузить заказы: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Не удалось загрузить заказы: ${err.message}</td></tr>`;
         return;
     }
 
@@ -127,13 +127,11 @@ function renderOrdersTable(orders) {
         : orders.filter((o) => o.status === activeStatus);
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Заказов нет</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Заказов нет</td></tr>';
         return;
     }
 
     tbody.innerHTML = filtered.map((o) => {
-        // ИСПРАВЛЕНО: для терминального статуса "отменён" кнопку "Далее" не показываем
-        const isTerminal = o.status === 'выдан' || o.status === 'отменён';
         return `
         <tr data-id="${o.id}">
             <td>${o.id}</td>
@@ -142,7 +140,6 @@ function renderOrdersTable(orders) {
             <td>${o.deliveryType === 'delivery' ? 'Доставка' : 'Самовывоз'}</td>
             <td>${o.total} ₽</td>
             <td>${renderStatusSelect(o.id, o.status, ORDER_STATUS_OPTIONS, 'order')}</td>
-            <td>${isTerminal ? '' : `<button class="btn btn-small next-status-btn" data-id="${o.id}" data-type="order">Далее →</button>`}</td>
         </tr>
     `;
     }).join('');
@@ -151,23 +148,12 @@ function renderOrdersTable(orders) {
 }
 
 function attachOrderRowHandlers() {
-    document.querySelectorAll('.next-status-btn[data-type="order"]').forEach((btn) => {
-        btn.addEventListener('click', async () => {
-            const id = btn.dataset.id;
-            const row = btn.closest('tr');
-            const currentStatus = row.querySelector('select').value;
-            const currentIndex = ORDER_STATUSES.indexOf(currentStatus);
-
-            // ИСПРАВЛЕНО: currentIndex будет -1 и для 'отменён' (его нет в ORDER_STATUSES) —
-            // кнопка уже не рендерится для терминальных статусов, но проверка оставлена
-            // как дополнительная защита.
-            if (currentIndex === -1 || currentIndex === ORDER_STATUSES.length - 1) return;
-            const nextStatus = ORDER_STATUSES[currentIndex + 1];
-
-            await changeOrderStatus(id, nextStatus);
-        });
-    });
-
+    // ИСПРАВЛЕНО: раньше в одной строке было сразу два способа сменить статус —
+    // select (применялся мгновенно по onChange) и кнопка "Далее →" (продвигала
+    // на шаг вперёд от ТЕКУЩЕГО значения select). Если сначала выбрать статус
+    // в списке, а затем ещё нажать "Далее" — заказ реально продвигался ещё на
+    // один шаг дальше задуманного (например, "готов" → "выдан"), хотя внешне
+    // выглядело как одно действие. Кнопку убрали, select — единственный способ.
     document.querySelectorAll('select[data-type="order"]').forEach((select) => {
         select.addEventListener('change', () => changeOrderStatus(select.dataset.id, select.value));
     });

@@ -129,7 +129,8 @@ function setupCartItemHandlers() {
 function updateCartSummary(cart) {
     const subtotalEl = document.getElementById('cart-subtotal');
     const finalTotalEl = document.getElementById('cart-final-total');
-    const bonusCheckbox = document.getElementById('use-bonus');
+    const bonusSlider = document.getElementById('bonus-slider');
+    const bonusInput = document.getElementById('bonus-input');
     const bonusBalanceEl = document.getElementById('user-bonus-balance');
 
     const subtotal = getCartTotal(cart);
@@ -138,18 +139,25 @@ function updateCartSummary(cart) {
     let bonusBalance = 0;
     let finalTotal = subtotal;
 
-    if (session && bonusCheckbox) {
+    if (session && bonusSlider && bonusInput) {
         bonusBalance = session.bonusBalance || 0;
         if (bonusBalanceEl) bonusBalanceEl.textContent = bonusBalance;
-        bonusCheckbox.disabled = subtotal === 0 || bonusBalance === 0;
 
-        if (bonusCheckbox.checked) {
-            // ИСПРАВЛЕНО: было Math.round — расходилось с сервером и checkout.js,
-            // где используется Math.floor(subtotal * 0.9). Теперь предпросмотр
-            // в корзине всегда совпадает с суммой, которая реально применится.
-            const maxDiscount = Math.min(bonusBalance, Math.floor(subtotal * 0.9));
-            finalTotal = subtotal - maxDiscount;
-        }
+        // Совпадает с checkout.js/OrderEndpoints.cs: до 90% суммы заказа,
+        // не больше остатка баллов.
+        const maxDiscount = Math.min(bonusBalance, Math.floor(subtotal * 0.9));
+        const isUsable = subtotal > 0 && maxDiscount > 0;
+
+        bonusSlider.disabled = !isUsable;
+        bonusInput.disabled = !isUsable;
+        bonusSlider.max = maxDiscount;
+        bonusInput.max = maxDiscount;
+
+        const current = Math.min(Number(bonusSlider.value) || 0, maxDiscount);
+        bonusSlider.value = current;
+        bonusInput.value = current;
+
+        finalTotal = subtotal - current;
     }
 
     if (subtotalEl) subtotalEl.textContent = `${subtotal} ₽`;
@@ -158,9 +166,21 @@ function updateCartSummary(cart) {
 
 // Переход к оформлению заказа
 document.addEventListener('DOMContentLoaded', () => {
-    const bonusCheckbox = document.getElementById('use-bonus');
-    if (bonusCheckbox) {
-        bonusCheckbox.addEventListener('change', () => renderCartPage());
+    const bonusSlider = document.getElementById('bonus-slider');
+    const bonusInput = document.getElementById('bonus-input');
+    if (bonusSlider && bonusInput) {
+        bonusSlider.addEventListener('input', () => {
+            bonusInput.value = bonusSlider.value;
+            renderCartPage();
+        });
+        bonusInput.addEventListener('input', () => {
+            const max = Number(bonusInput.max) || 0;
+            let value = Math.round(Number(bonusInput.value)) || 0;
+            value = Math.min(Math.max(value, 0), max);
+            bonusInput.value = value;
+            bonusSlider.value = value;
+            renderCartPage();
+        });
     }
 
     const checkoutBtn = document.getElementById('checkout-btn');
