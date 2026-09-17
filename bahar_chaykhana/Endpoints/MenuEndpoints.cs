@@ -42,5 +42,31 @@ public static class MenuEndpoints
 
             return Results.Ok(dishes);
         });
+
+        // GET /api/categories — список категорий для кнопок-фильтров на menu.html.
+        // ДОБАВЛЕНО: раньше список категорий был захардкожен в menu.js
+        // (CATEGORY_LABELS) — при каждой новой категории требовалась правка кода.
+        // Теперь меню читает актуальный список отсюда.
+        app.MapGet("/api/categories", async (DbConnectionFactory db) =>
+        {
+            await using var connection = db.CreateConnection();
+            await connection.OpenAsync();
+
+            await using var command = connection.CreateCommand();
+            command.CommandText = "SELECT slug, label FROM categories ORDER BY sort_order";
+
+            var categories = new List<object>();
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                categories.Add(new
+                {
+                    slug = reader.GetString(0),
+                    label = reader.GetString(1)
+                });
+            }
+
+            return Results.Ok(categories);
+        });
     }
 }

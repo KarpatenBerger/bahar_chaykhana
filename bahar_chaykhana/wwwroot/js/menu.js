@@ -6,25 +6,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('dishes-container');
     if (!container) return; // не на странице меню
 
-    const CATEGORY_LABELS = {
-        soups: 'Супы',
-        starters: 'Закуски',
-        shashlik: 'Шашлык',
-        hot: 'Горячие блюда',
-        salads: 'Салаты',
-        pastries: 'Выпечка',
-        drinks: 'Напитки',
-        desserts: 'Десерты'
-    };
-    const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS);
-
+    // ИЗМЕНЕНО: раньше список категорий был захардкожен здесь (CATEGORY_LABELS) —
+    // каждая новая категория требовала правки этого файла и menu.html вручную.
+    // Теперь категории и их порядок приходят из /api/categories, куда админ может
+    // добавлять/удалять их через панель, без участия разработчика.
+    let categories = [];
     let dishes = [];
 
     try {
-        dishes = await api.get('/menu');
+        [categories, dishes] = await Promise.all([
+            api.get('/categories'),
+            api.get('/menu')
+        ]);
     } catch (err) {
         container.innerHTML = `<p class="error-message">Не удалось загрузить меню: ${err.message}</p>`;
         return;
+    }
+
+    const CATEGORY_LABELS = Object.fromEntries(categories.map((c) => [c.slug, c.label]));
+    const CATEGORY_ORDER = categories.map((c) => c.slug);
+
+    // Кнопка "Все блюда" уже есть в разметке menu.html статически, здесь только
+    // добавляем кнопки под реальные категории следом за ней.
+    const buttonsContainer = document.getElementById('category-buttons');
+    if (buttonsContainer) {
+        buttonsContainer.insertAdjacentHTML(
+            'beforeend',
+            categories.map((c) => `<button class="category-btn" data-category="${c.slug}">${c.label}</button>`).join('')
+        );
     }
 
     function dishCardHtml(dish) {

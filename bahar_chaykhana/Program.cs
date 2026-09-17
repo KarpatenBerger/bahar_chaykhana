@@ -24,6 +24,7 @@ app.MapAccountEndpoints();
 app.MapOrderEndpoints();
 app.MapReservationEndpoints();
 app.MapAdminEndpoints();
+app.MapAdminMenuEndpoints();
 app.MapCancelEndpoints();
 
 // Проверочный endpoint

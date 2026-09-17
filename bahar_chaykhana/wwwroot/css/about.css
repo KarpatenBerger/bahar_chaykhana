@@ -69,7 +69,15 @@
     aspect-ratio: 1 / 1;
     border-radius: var(--radius);
     background: repeating-linear-gradient( 135deg, var(--color-cream-deep), var(--color-cream-deep) 10px, var(--color-white) 10px, var(--color-white) 20px );
+    overflow: hidden;
 }
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
 
 .gallery-note {
     text-align: center;
