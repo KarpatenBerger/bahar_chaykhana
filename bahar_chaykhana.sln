@@ -11,11 +11,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "database", "database", "{36
 		database\migration_add_categories_table.sql = database\migration_add_categories_table.sql
 		bahar_chaykhana\migration_add_employee_email.sql = bahar_chaykhana\migration_add_employee_email.sql
 		database\migration_add_reservation_cancelled_status.sql = database\migration_add_reservation_cancelled_status.sql
-		C:\Users\MSI\Downloads\files (1)\schema.sql = C:\Users\MSI\Downloads\files (1)\schema.sql
+		database\schema.sql = database\schema.sql
 		database\seed_categories.sql = database\seed_categories.sql
-		C:\Users\MSI\Downloads\files (1)\seed_customers.sql = C:\Users\MSI\Downloads\files (1)\seed_customers.sql
-		C:\Users\MSI\Downloads\files (1)\seed_dishes.sql = C:\Users\MSI\Downloads\files (1)\seed_dishes.sql
-		C:\Users\MSI\Downloads\files (1)\seed_employees.sql = C:\Users\MSI\Downloads\files (1)\seed_employees.sql
+		database\seed_customers.sql = database\seed_customers.sql
+		database\seed_dishes.sql = database\seed_dishes.sql
+		database\seed_employees.sql = database\seed_employees.sql
 	EndProjectSection
 EndProject
 Global

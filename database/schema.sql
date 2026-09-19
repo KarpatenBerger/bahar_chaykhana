@@ -4,11 +4,24 @@
 -- Порядок таблиц важен из-за внешних ключей: сначала независимые таблицы,
 -- затем те, что на них ссылаются.
 
+-- Категории меню
+-- ДОБАВЛЕНО: раньше категории существовали только как текстовые значения в
+-- dishes.category, захардкоженные кнопками на menu.html. Теперь это отдельный
+-- справочник — админ может добавлять/удалять категории через панель, а сайт
+-- подтягивает список через /api/categories (см. migration_add_categories_table.sql).
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    slug VARCHAR(50) NOT NULL UNIQUE,   -- техническое имя, как в dishes.category
+    label VARCHAR(100) NOT NULL,        -- отображаемое название на сайте
+    sort_order INT NOT NULL DEFAULT 0
+);
+
 -- Блюда меню
 CREATE TABLE dishes (
     id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
-    category VARCHAR(50) NOT NULL, -- soups, shashlik, hot, salads, drinks, desserts
+    category VARCHAR(50) NOT NULL
+        REFERENCES categories(slug) ON DELETE RESTRICT, -- ДОБАВЛЕНО: см. выше
     weight_g INT NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     image_url VARCHAR(255),
