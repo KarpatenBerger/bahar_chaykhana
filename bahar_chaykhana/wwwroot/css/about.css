@@ -22,12 +22,28 @@
     padding: 56px 0;
 }
 
-.about-grid {
-    display: grid;
-    grid-template-columns: 1.3fr 1fr;
-    gap: 40px;
-    align-items: start;
-    max-width: 980px;
+.about-banner {
+    max-width: 760px;
+    margin: 40px auto 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+    .about-banner img {
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Пока файла нет (или он не загрузился) — баннер просто не рендерится через
+   onerror + :empty, ниже сразу идёт текст, вёрстка не ломается */
+    .about-banner:empty {
+        display: none;
+    }
+
+.about-text-full {
+    max-width: 760px;
     margin: 0 auto;
 }
 
@@ -40,43 +56,10 @@
     font-size: 15.5px;
 }
 
-.about-photos {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-    .about-photos img {
-        width: 100%;
+@media (max-width: 720px) {
+    .about-banner img {
         aspect-ratio: 4 / 3;
-        object-fit: cover;
-        border-radius: var(--radius-lg);
-        display: block;
-        /* Тот же приём, что обсуждали для галереи: полное обесцвечивание убирает
-       разницу в материалах и цветах между разными источниками фото (дерево
-       или камень, красный ковёр или золотой), sepia поверх просто подкрашивает
-       результат в тон сайту. */
-        filter: grayscale(1) sepia(0.35) contrast(1.05) brightness(1.02);
     }
-
-    /* Пока файлов нет (или не загрузился один из двух) — картинка убирается через
-   onerror, и если в итоге в блоке не осталось ни одной, он просто не рендерится */
-    .about-photos:empty {
-        display: none;
-    }
-
-@media (max-width: 820px) {
-    .about-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .about-photos {
-        flex-direction: row;
-    }
-
-        .about-photos img {
-            flex: 1;
-        }
 }
 
 .about-features {
