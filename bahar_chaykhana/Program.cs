@@ -1,23 +1,23 @@
-using bahar_chaykhana.Data;
+п»їusing bahar_chaykhana.Data;
 using bahar_chaykhana.Endpoints;
 using bahar_chaykhana.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Регистрируем подключение к БД
+// Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє Р‘Р”
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton(new DbConnectionFactory(connectionString));
 
-// Регистрируем сервис отправки email (понадобится для уведомлений)
+// Р РµРіРёСЃС‚СЂРёСЂСѓРµРј СЃРµСЂРІРёСЃ РѕС‚РїСЂР°РІРєРё email (РїРѕРЅР°РґРѕР±РёС‚СЃСЏ РґР»СЏ СѓРІРµРґРѕРјР»РµРЅРёР№)
 builder.Services.AddSingleton<EmailService>();
 
 var app = builder.Build();
 
-// Раздача статических файлов (HTML/CSS/JS)
+// Р Р°Р·РґР°С‡Р° СЃС‚Р°С‚РёС‡РµСЃРєРёС… С„Р°Р№Р»РѕРІ (HTML/CSS/JS)
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Подключаем все эндпоинты API
+// РџРѕРґРєР»СЋС‡Р°РµРј РІСЃРµ СЌРЅРґРїРѕРёРЅС‚С‹ API
 app.MapMenuEndpoints();
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
@@ -27,7 +27,7 @@ app.MapAdminEndpoints();
 app.MapAdminMenuEndpoints();
 app.MapCancelEndpoints();
 
-// Проверочный endpoint
+// РџСЂРѕРІРµСЂРѕС‡РЅС‹Р№ endpoint
 app.MapGet("/api/health", () => "OK");
 
 app.Run();
