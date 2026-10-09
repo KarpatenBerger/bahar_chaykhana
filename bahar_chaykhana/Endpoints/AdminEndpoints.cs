@@ -49,7 +49,7 @@ public static class AdminEndpoints
             return Results.Ok();
         });
 
-        // Список заказов
+        // Список заказов (с контактами, комментарием и составом каждого заказа)
         app.MapGet("/api/admin/orders", async (HttpContext context, DbConnectionFactory db) =>
         {
             if (!context.Request.Cookies.TryGetValue("bahar_employee_id", out _))
@@ -58,9 +58,34 @@ public static class AdminEndpoints
             await using var connection = db.CreateConnection();
             await connection.OpenAsync();
 
+            // Состав всех заказов одним запросом, группируем по order_id
+            var itemsByOrder = new Dictionary<int, List<object>>();
+            await using (var itemsCmd = connection.CreateCommand())
+            {
+                itemsCmd.CommandText = @"
+                    SELECT oi.order_id, d.name, oi.quantity, oi.price_at_order
+                    FROM order_items oi
+                    JOIN dishes d ON d.id = oi.dish_id
+                    ORDER BY oi.order_id, oi.id";
+                await using var ir = await itemsCmd.ExecuteReaderAsync();
+                while (await ir.ReadAsync())
+                {
+                    var orderId = ir.GetInt32(0);
+                    if (!itemsByOrder.TryGetValue(orderId, out var list))
+                        itemsByOrder[orderId] = list = new List<object>();
+                    list.Add(new
+                    {
+                        name = ir.GetString(1),
+                        quantity = ir.GetInt32(2),
+                        price = ir.GetDecimal(3)
+                    });
+                }
+            }
+
             await using var cmd = connection.CreateCommand();
             cmd.CommandText = @"
-                SELECT id, customer_name, phone, delivery_type, subtotal, delivery_cost, bonus_used, total, status, created_at
+                SELECT id, customer_name, phone, delivery_type, subtotal, delivery_cost, bonus_used, total, status, created_at,
+                       email, address, comment
                 FROM orders
                 ORDER BY created_at DESC";
 
@@ -68,9 +93,10 @@ public static class AdminEndpoints
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
+                var id = reader.GetInt32(0);
                 orders.Add(new
                 {
-                    id = reader.GetInt32(0),
+                    id,
                     customerName = reader.GetString(1),
                     phone = reader.GetString(2),
                     deliveryType = reader.GetString(3),
@@ -79,7 +105,11 @@ public static class AdminEndpoints
                     bonusUsed = reader.GetInt32(6),
                     total = reader.GetDecimal(7),
                     status = reader.GetString(8),
-                    createdAt = reader.GetDateTime(9).ToString("o")
+                    createdAt = reader.GetDateTime(9).ToString("o"),
+                    email = reader.IsDBNull(10) ? null : reader.GetString(10),
+                    address = reader.IsDBNull(11) ? null : reader.GetString(11),
+                    comment = reader.IsDBNull(12) ? null : reader.GetString(12),
+                    items = itemsByOrder.TryGetValue(id, out var its) ? its : new List<object>()
                 });
             }
 
@@ -193,7 +223,9 @@ public static class AdminEndpoints
 
                     try
                     {
-                        await emailService.SendOrderStatusEmailAsync(email, customerName ?? "Гость", id, payload.Status, cancelUrl);
+                        var details = await OrderDetailsLoader.LoadAsync(connection, id);
+                        if (details != null)
+                            await emailService.SendOrderStatusEmailAsync(email, details, payload.Status, cancelUrl);
                     }
                     catch (Exception ex)
                     {

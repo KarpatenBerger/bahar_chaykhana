@@ -118,6 +118,66 @@ async function loadOrdersIfPresent() {
     renderOrdersTable(orders);
 }
 
+// id раскрытых заказов: хранится отдельно, чтобы после смены статуса
+// (таблица перерисовывается) раскрытые строки не схлопывались.
+const expandedOrders = new Set();
+
+// Всё, что ввёл гость (имя, адрес, комментарий) и названия блюд, выводим
+// через экранирование — иначе символы < > & ломают вёрстку и открывают XSS.
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function formatMoney(value) {
+    return Number(value).toLocaleString('ru-RU') + ' ₽';
+}
+
+function renderOrderDetails(o) {
+    const isDelivery = o.deliveryType === 'delivery';
+
+    const itemsRows = (o.items || []).map((i) => `
+        <tr>
+            <td>${escapeHtml(i.name)}</td>
+            <td class="num">${i.quantity}</td>
+            <td class="num">${formatMoney(i.price)}</td>
+            <td class="num">${formatMoney(i.price * i.quantity)}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="4" class="empty-state">Состав заказа не найден</td></tr>';
+
+    const deliveryRow = isDelivery
+        ? `<tr><td colspan="3">Доставка</td><td class="num">${formatMoney(o.deliveryCost)}</td></tr>` : '';
+    const bonusRow = o.bonusUsed > 0
+        ? `<tr><td colspan="3">Оплачено бонусами</td><td class="num">−${formatMoney(o.bonusUsed)}</td></tr>` : '';
+
+    return `
+        <div class="order-details">
+            <dl class="order-info">
+                <dt>Дата и время заказа</dt><dd>${formatDateTime(o.createdAt)}</dd>
+                <dt>Гость</dt><dd>${escapeHtml(o.customerName)}</dd>
+                <dt>Телефон</dt><dd>${escapeHtml(o.phone)}</dd>
+                <dt>Email</dt><dd>${o.email ? escapeHtml(o.email) : '— не указан'}</dd>
+                <dt>Получение</dt><dd>${isDelivery ? 'Доставка' : 'Самовывоз'}</dd>
+                ${isDelivery ? `<dt>Адрес</dt><dd>${escapeHtml(o.address || '— не указан')}</dd>` : ''}
+                <dt>Комментарий</dt><dd>${o.comment ? escapeHtml(o.comment) : '—'}</dd>
+            </dl>
+            <table class="order-items">
+                <thead>
+                    <tr><th>Блюдо</th><th class="num">Кол-во</th><th class="num">Цена</th><th class="num">Сумма</th></tr>
+                </thead>
+                <tbody>${itemsRows}</tbody>
+                <tfoot>
+                    <tr><td colspan="3">Сумма блюд</td><td class="num">${formatMoney(o.subtotal)}</td></tr>
+                    ${deliveryRow}
+                    ${bonusRow}
+                    <tr class="order-total"><td colspan="3">Итого</td><td class="num">${formatMoney(o.total)}</td></tr>
+                </tfoot>
+            </table>
+        </div>
+    `;
+}
+
 function renderOrdersTable(orders) {
     const tbody = document.getElementById('orders-table-body');
     const filter = document.getElementById('order-status-filter');
@@ -133,19 +193,36 @@ function renderOrdersTable(orders) {
     }
 
     tbody.innerHTML = filtered.map((o) => {
+        const open = expandedOrders.has(o.id);
         return `
-        <tr data-id="${o.id}">
-            <td>${o.id}</td>
+        <tr class="order-row ${open ? 'expanded' : ''}" data-id="${o.id}" title="Нажмите, чтобы посмотреть состав заказа">
+            <td><span class="order-chevron"></span>${o.id}</td>
             <td>${formatDateTime(o.createdAt)}</td>
-            <td>${o.customerName}</td>
+            <td>${escapeHtml(o.customerName)}</td>
             <td>${o.deliveryType === 'delivery' ? 'Доставка' : 'Самовывоз'}</td>
-            <td>${o.total} ₽</td>
+            <td>${formatMoney(o.total)}</td>
             <td>${renderStatusSelect(o.id, o.status, ORDER_STATUS_OPTIONS, 'order')}</td>
+        </tr>
+        <tr class="order-details-row" data-details-for="${o.id}" ${open ? '' : 'hidden'}>
+            <td colspan="6">${renderOrderDetails(o)}</td>
         </tr>
     `;
     }).join('');
 
     attachOrderRowHandlers();
+}
+
+function toggleOrderDetails(id) {
+    const row = document.querySelector(`tr.order-row[data-id="${id}"]`);
+    const details = document.querySelector(`tr[data-details-for="${id}"]`);
+    if (!row || !details) return;
+
+    const willOpen = details.hidden;
+    details.hidden = !willOpen;
+    row.classList.toggle('expanded', willOpen);
+
+    if (willOpen) expandedOrders.add(Number(id));
+    else expandedOrders.delete(Number(id));
 }
 
 function attachOrderRowHandlers() {
@@ -157,6 +234,14 @@ function attachOrderRowHandlers() {
     // выглядело как одно действие. Кнопку убрали, select — единственный способ.
     document.querySelectorAll('select[data-type="order"]').forEach((select) => {
         select.addEventListener('change', () => changeOrderStatus(select.dataset.id, select.value));
+    });
+
+    // Клик по строке раскрывает/сворачивает подробности (клик по select не считается)
+    document.querySelectorAll('tr.order-row').forEach((row) => {
+        row.addEventListener('click', (e) => {
+            if (e.target.closest('select, option, a, button')) return;
+            toggleOrderDetails(row.dataset.id);
+        });
     });
 }
 
