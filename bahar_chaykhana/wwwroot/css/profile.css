@@ -78,17 +78,17 @@
     padding: 24px;
 }
 
-.profile-block.full-width {
-    grid-column: 1 / -1;
-}
+    .profile-block.full-width {
+        grid-column: 1 / -1;
+    }
 
-.profile-block h4 {
-    font-size: 16px;
-    color: var(--color-brass);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 1em;
-}
+    .profile-block h4 {
+        font-size: 16px;
+        color: var(--color-brass);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 1em;
+    }
 
 .info-row {
     display: flex;
@@ -98,9 +98,9 @@
     font-size: 14px;
 }
 
-.info-row:last-child {
-    border-bottom: none;
-}
+    .info-row:last-child {
+        border-bottom: none;
+    }
 
 .info-label {
     color: var(--color-ink-soft);
@@ -120,10 +120,10 @@
     border-bottom: 1px solid var(--color-cream-deep);
 }
 
-.order-history-item > div {
-    display: flex;
-    flex-direction: column;
-}
+    .order-history-item > div {
+        display: flex;
+        flex-direction: column;
+    }
 
 .order-date {
     font-size: 12px;
@@ -161,3 +161,69 @@
         grid-template-columns: 1fr;
     }
 }
+
+
+/* ---------- Раскрывающиеся заказы в истории ---------- */
+
+.order-history-card > summary {
+    cursor: pointer;
+    list-style: none; /* убираем стандартный маркер */
+}
+
+    .order-history-card > summary::-webkit-details-marker {
+        display: none;
+    }
+
+.order-history-card .order-id::before {
+    content: '▸ ';
+    color: var(--color-ink-soft);
+}
+
+.order-history-card[open] .order-id::before {
+    content: '▾ ';
+}
+
+.order-history-details {
+    padding: 12px 4px 16px;
+    border-bottom: 1px solid var(--color-cream-deep);
+    font-size: 14px;
+}
+
+    .order-history-details p {
+        margin: 0 0 6px;
+        white-space: pre-wrap; /* сохраняем переносы строк в комментарии */
+        word-break: break-word;
+    }
+
+.order-history-items {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+    .order-history-items th,
+    .order-history-items td {
+        padding: 6px 4px;
+        text-align: left;
+        border-bottom: 1px solid var(--color-cream-deep);
+    }
+
+    .order-history-items .num {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .order-history-items tfoot td {
+        border-bottom: none;
+    }
+
+        .order-history-items tfoot td:first-child {
+            text-align: right;
+            color: var(--color-ink-soft);
+        }
+
+    .order-history-items .order-history-total td {
+        font-weight: 700;
+        border-top: 1px solid var(--color-cream-deep);
+        padding-top: 8px;
+    }

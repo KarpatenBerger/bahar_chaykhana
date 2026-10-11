@@ -74,10 +74,13 @@ public static class AccountEndpoints
                 }
             }
 
-            var orders = new List<object>();
+            // Последние 20 заказов гостя. Фильтр customer_id = @id гарантирует,
+            // что гость видит только свои заказы.
+            var orderRows = new List<OrderRow>();
             await using var ordCmd = connection.CreateCommand();
             ordCmd.CommandText = @"
-                SELECT id, total, status, created_at
+                SELECT id, total, status, created_at, delivery_type, address, comment,
+                       subtotal, delivery_cost, bonus_used
                 FROM orders
                 WHERE customer_id = @id
                 ORDER BY created_at DESC
@@ -87,15 +90,62 @@ public static class AccountEndpoints
             {
                 while (await ordReader.ReadAsync())
                 {
-                    orders.Add(new
+                    orderRows.Add(new OrderRow(
+                        ordReader.GetInt32(0),
+                        ordReader.GetDecimal(1),
+                        ordReader.GetString(2),
+                        ordReader.GetDateTime(3),
+                        ordReader.GetString(4),
+                        ordReader.IsDBNull(5) ? null : ordReader.GetString(5),
+                        ordReader.IsDBNull(6) ? null : ordReader.GetString(6),
+                        ordReader.GetDecimal(7),
+                        ordReader.GetDecimal(8),
+                        ordReader.GetInt32(9)));
+                }
+            }
+
+            // Состав этих заказов одним запросом
+            var itemsByOrder = new Dictionary<int, List<object>>();
+            if (orderRows.Count > 0)
+            {
+                await using var itemsCmd = connection.CreateCommand();
+                itemsCmd.CommandText = @"
+                    SELECT oi.order_id, d.name, oi.quantity, oi.price_at_order
+                    FROM order_items oi
+                    JOIN dishes d ON d.id = oi.dish_id
+                    WHERE oi.order_id = ANY(@ids)
+                    ORDER BY oi.order_id, oi.id";
+                itemsCmd.Parameters.AddWithValue("@ids", orderRows.Select(o => o.Id).ToArray());
+
+                await using var itemsReader = await itemsCmd.ExecuteReaderAsync();
+                while (await itemsReader.ReadAsync())
+                {
+                    var orderId = itemsReader.GetInt32(0);
+                    if (!itemsByOrder.TryGetValue(orderId, out var list))
+                        itemsByOrder[orderId] = list = new List<object>();
+                    list.Add(new
                     {
-                        id = ordReader.GetInt32(0),
-                        total = ordReader.GetDecimal(1),
-                        status = ordReader.GetString(2),
-                        createdAt = ordReader.GetDateTime(3).ToString("o")
+                        name = itemsReader.GetString(1),
+                        quantity = itemsReader.GetInt32(2),
+                        price = itemsReader.GetDecimal(3)
                     });
                 }
             }
+
+            var orders = orderRows.Select(o => new
+            {
+                id = o.Id,
+                total = o.Total,
+                status = o.Status,
+                createdAt = o.CreatedAt.ToString("o"),
+                deliveryType = o.DeliveryType,
+                address = o.Address,
+                comment = o.Comment,
+                subtotal = o.Subtotal,
+                deliveryCost = o.DeliveryCost,
+                bonusUsed = o.BonusUsed,
+                items = itemsByOrder.TryGetValue(o.Id, out var its) ? its : new List<object>()
+            }).ToList();
 
             return Results.Ok(new
             {
@@ -110,4 +160,9 @@ public static class AccountEndpoints
             });
         });
     }
+
+    private sealed record OrderRow(
+        int Id, decimal Total, string Status, DateTime CreatedAt,
+        string DeliveryType, string? Address, string? Comment,
+        decimal Subtotal, decimal DeliveryCost, int BonusUsed);
 }
